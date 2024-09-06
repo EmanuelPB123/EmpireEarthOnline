@@ -9,12 +9,16 @@
 <style>
     body,
     html {
+
+        /* PC version */
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #1a1a1a;
+        color: #e0e0e0;
     }
 
     #game-container {
@@ -28,14 +32,14 @@
         left: 0;
         width: 100%;
         height: 40px;
-        background: rgba(255, 174, 0, 0.75);
-        color: white;
+        background: rgba(30, 30, 30, 0.9);
+        color: #e0e0e0;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0 10px;
         z-index: 1000;
-
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     #middle-nav {
@@ -44,13 +48,13 @@
         left: 0;
         width: 100%;
         height: 40px;
-        background: rgba(255, 174, 0, 0.75);
-        color: white;
+        background: rgba(30, 30, 30, 0.9);
+        color: #e0e0e0;
         display: flex;
         align-items: center;
         justify-content: space-around;
         z-index: 1000;
-        border: inset rgb(255, 72, 0);
+        border: 1px solid #444;
     }
 
     #bottom-nav {
@@ -59,12 +63,12 @@
         left: 0;
         width: 100%;
         height: 90px;
-        background: rgba(255, 174, 0, 0.75);
+        background: rgba(30, 30, 30, 0.9);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1000;
-        border: inset rgb(255, 72, 0);
+        border-top: 1px solid #444;
     }
 
     #bottom-nav .button-grid {
@@ -82,17 +86,18 @@
         height: 45px;
         font-size: 20px;
         padding: 0;
-        background-color: #444;
-        color: white;
+        background-color: #2a2a2a;
+        color: #e0e0e0;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: outset rgb(0, 0, 0);
+        border: 1px solid #444;
+        transition: all 0.3s ease;
     }
 
     .nav-button:hover {
-        background-color: #555;
+        background-color: #3a3a3a;
     }
 
     .resource-info {
@@ -101,110 +106,400 @@
         bottom: 100%;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(255, 174, 0, 0.75);
-        color: white;
+        background: rgba(30, 30, 30, 0.9);
+        color: #e0e0e0;
         padding: 5px 10px;
-        border-radius: 5px;
+        border-radius: 3px;
         font-size: 14px;
         white-space: nowrap;
         pointer-events: none;
         z-index: 9999;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .nav-button-container:hover .resource-info {
         display: block;
     }
 
-    /*     #hud {
-        position: fixed;
-        top: 50px;
-        left: 10px;
-        background: rgba(255, 174, 0, 0.75);
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        max-width: 300px;
-        font-size: 12px;
-    } */
-
-
-
     #side-nav {
-    position: fixed;
-    top: 40px; /* Altura del nav superior */
-    left: 0;
-    width: 140px; /* Ancho para 3 columnas de 45px cada una */
-    bottom: 136px; /* Altura del nav inferior + nav del medio */
-    background: rgba(255, 174, 0, 0.75);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 0;
-    z-index: 1000;
-    border: inset rgb(255, 72, 0);
-/*     overflow-y: auto; */
-}
+        position: fixed;
+        top: 40px;
+        left: 0;
+        width: 140px;
+        bottom: 136px;
+        background: rgba(30, 30, 30, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 0;
+        z-index: 1000;
+        border-right: 1px solid #444;
+    }
 
-#side-nav .button-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 45px);
-    gap: 0px;
-}
+    #side-nav .button-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 45px);
+        gap: 0px;
+    }
 
-#side-nav .nav-button-container {
-    margin-bottom: 1px;
-}
+    #side-nav .nav-button-container {
+        margin-bottom: 1px;
+    }
 
-#side-nav .nav-button {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-}
+    #side-nav .nav-button {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
 
-#side-nav .resource-info {
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 1px;
-    border-radius: 1px;
-    white-space: nowrap;
-    font-size: 12px;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s, opacity 0.3s linear;
-}
+    #side-nav .resource-info {
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(30, 30, 30, 0.9);
+        color: #e0e0e0;
+        padding: 5px;
+        border-radius: 3px;
+        white-space: nowrap;
+        font-size: 12px;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.3s linear;
+    }
 
-/* #side-nav .nav-button-container:hover .resource-info {
-    visibility: visible;
-    opacity: 1;
-} */
+    .era-button {
+        background-color: #3a3a3a;
+        color: #e0e0e0;
+        border: 1px solid #555;
+        border-radius: 3px;
+        padding: 8px 16px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
 
+    .era-button:hover {
+        background-color: #4a4a4a;
+    }
 
-
+    .era-button i {
+        font-size: 18px;
+    }
 
     #config-menu {
         position: absolute;
         top: 40%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(255, 174, 0, 0.75);
-        color: white;
+        background: rgba(30, 30, 30, 0.95);
+        color: #e0e0e0;
         padding: 20px;
-        border-radius: 0px;
+        border-radius: 5px;
         text-align: center;
-        border: outset rgb(0, 0, 0);
-
+        border: 1px solid #444;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
     #config-menu input {
         width: 50px;
         margin-right: 10px;
+        background-color: #2a2a2a;
+        border: 1px solid #444;
+        color: #e0e0e0;
+        padding: 5px;
     }
 
     #config-menu button {
         margin-top: 20px;
+    }
+
+    #start-game {
+        background-color: #4a4a4a;
+        color: #e0e0e0;
+        border: 1px solid #555;
+        border-radius: 3px;
+        padding: 10px 20px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    #start-game:hover {
+        background-color: #5a5a5a;
+    }
+
+    #start-game::before {
+        content: "\f144";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+
+    .config-button {
+        background-color: #3a3a3a;
+        color: #e0e0e0;
+        border: 1px solid #555;
+        border-radius: 3px;
+        padding: 8px 16px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .config-button:hover {
+        background-color: #4a4a4a;
+    }
+
+    .config-button i {
+        font-size: 18px;
+    }
+
+    /*Taber version */
+    @media (max-width: 1024px) {
+        #side-nav {
+            width: 120px;
+        }
+
+        #side-nav .button-grid {
+            grid-template-columns: repeat(2, 45px);
+        }
+
+        #bottom-nav {
+            height: 80px;
+        }
+
+        .nav-button {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+
+        #middle-nav {
+            bottom: 80px;
+        }
+    }
+
+    /* Mobile version */
+    @media (max-width: 768px) {
+        #side-nav {
+            width: 90px;
+            bottom: 120px;
+        }
+
+        #side-nav .button-grid {
+            grid-template-columns: repeat(2, 40px);
+        }
+
+        #side-nav .nav-button {
+            width: 35px;
+            height: 35px;
+            font-size: 14px;
+        }
+
+        #bottom-nav {
+            height: 70px;
+        }
+
+        #bottom-nav .button-grid {
+            grid-template-columns: repeat(6, 35px);
+        }
+
+        .nav-button {
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+
+        #middle-nav {
+            bottom: 70px;
+            height: 50px;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            padding: 5px 0;
+        }
+
+        .era-button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        #top-nav {
+            height: 30px;
+            font-size: 14px;
+        }
+
+        .resource-info {
+            font-size: 12px;
+            padding: 3px 6px;
+        }
+    }
+
+    #side-nav .nav-button-container {
+        display: none;
+    }
+
+    #side-nav.edad-prehistórica .nav-button-container[data-era="0"] {
+        display: block;
+    }
+
+    #side-nav.edad-de-piedra .nav-button-container[data-era="0"],
+    #side-nav.edad-de-piedra .nav-button-container[data-era="1"] {
+        display: block;
+    }
+
+    #side-nav.edad-de-cobre .nav-button-container[data-era="0"],
+    #side-nav.edad-de-cobre .nav-button-container[data-era="1"],
+    #side-nav.edad-de-cobre .nav-button-container[data-era="2"] {
+        display: block;
+    }
+
+    #side-nav.edad-de-bronce .nav-button-container[data-era="0"],
+    #side-nav.edad-de-bronce .nav-button-container[data-era="1"],
+    #side-nav.edad-de-bronce .nav-button-container[data-era="2"],
+    #side-nav.edad-de-bronce .nav-button-container[data-era="3"] {
+        display: block;
+    }
+
+    #side-nav.edad-oscura .nav-button-container[data-era="0"],
+    #side-nav.edad-oscura .nav-button-container[data-era="1"],
+    #side-nav.edad-oscura .nav-button-container[data-era="2"],
+    #side-nav.edad-oscura .nav-button-container[data-era="3"],
+    #side-nav.edad-oscura .nav-button-container[data-era="4"] {
+        display: block;
+    }
+
+    #side-nav.edad-media .nav-button-container[data-era="0"],
+    #side-nav.edad-media .nav-button-container[data-era="1"],
+    #side-nav.edad-media .nav-button-container[data-era="2"],
+    #side-nav.edad-media .nav-button-container[data-era="3"],
+    #side-nav.edad-media .nav-button-container[data-era="4"],
+    #side-nav.edad-media .nav-button-container[data-era="5"] {
+        display: block;
+    }
+
+    #side-nav.renacimiento .nav-button-container[data-era="0"],
+    #side-nav.renacimiento .nav-button-container[data-era="1"],
+    #side-nav.renacimiento .nav-button-container[data-era="2"],
+    #side-nav.renacimiento .nav-button-container[data-era="3"],
+    #side-nav.renacimiento .nav-button-container[data-era="4"],
+    #side-nav.renacimiento .nav-button-container[data-era="5"],
+    #side-nav.renacimiento .nav-button-container[data-era="6"] {
+        display: block;
+    }
+
+    #side-nav.edad-imperial .nav-button-container[data-era="0"],
+    #side-nav.edad-imperial .nav-button-container[data-era="1"],
+    #side-nav.edad-imperial .nav-button-container[data-era="2"],
+    #side-nav.edad-imperial .nav-button-container[data-era="3"],
+    #side-nav.edad-imperial .nav-button-container[data-era="4"],
+    #side-nav.edad-imperial .nav-button-container[data-era="5"],
+    #side-nav.edad-imperial .nav-button-container[data-era="6"],
+    #side-nav.edad-imperial .nav-button-container[data-era="7"] {
+        display: block;
+    }
+
+    #side-nav.edad-industrial .nav-button-container[data-era="0"],
+    #side-nav.edad-industrial .nav-button-container[data-era="1"],
+    #side-nav.edad-industrial .nav-button-container[data-era="2"],
+    #side-nav.edad-industrial .nav-button-container[data-era="3"],
+    #side-nav.edad-industrial .nav-button-container[data-era="4"],
+    #side-nav.edad-industrial .nav-button-container[data-era="5"],
+    #side-nav.edad-industrial .nav-button-container[data-era="6"],
+    #side-nav.edad-industrial .nav-button-container[data-era="7"],
+    #side-nav.edad-industrial .nav-button-container[data-era="8"] {
+        display: block;
+    }
+
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="0"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="1"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="2"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="3"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="4"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="5"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="6"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="7"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="8"],
+    #side-nav.edad-atómica-igm .nav-button-container[data-era="9"] {
+        display: block;
+    }
+
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="0"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="1"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="2"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="3"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="4"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="5"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="6"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="7"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="8"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="9"],
+    #side-nav.edad-atómica-iigm .nav-button-container[data-era="10"] {
+        display: block;
+    }
+
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="0"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="1"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="2"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="3"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="4"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="5"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="6"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="7"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="8"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="9"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="10"],
+    #side-nav.edad-atómica-moderna .nav-button-container[data-era="11"] {
+        display: block;
+    }
+
+    #side-nav.edad-digital .nav-button-container[data-era="0"],
+    #side-nav.edad-digital .nav-button-container[data-era="1"],
+    #side-nav.edad-digital .nav-button-container[data-era="2"],
+    #side-nav.edad-digital .nav-button-container[data-era="3"],
+    #side-nav.edad-digital .nav-button-container[data-era="4"],
+    #side-nav.edad-digital .nav-button-container[data-era="5"],
+    #side-nav.edad-digital .nav-button-container[data-era="6"],
+    #side-nav.edad-digital .nav-button-container[data-era="7"],
+    #side-nav.edad-digital .nav-button-container[data-era="8"],
+    #side-nav.edad-digital .nav-button-container[data-era="9"],
+    #side-nav.edad-digital .nav-button-container[data-era="10"],
+    #side-nav.edad-digital .nav-button-container[data-era="11"],
+    #side-nav.edad-digital .nav-button-container[data-era="12"] {
+        display: block;
+    }
+
+    #side-nav.nano-edad .nav-button-container[data-era="0"],
+    #side-nav.nano-edad .nav-button-container[data-era="1"],
+    #side-nav.nano-edad .nav-button-container[data-era="2"],
+    #side-nav.nano-edad .nav-button-container[data-era="3"],
+    #side-nav.nano-edad .nav-button-container[data-era="4"],
+    #side-nav.nano-edad .nav-button-container[data-era="5"],
+    #side-nav.nano-edad .nav-button-container[data-era="6"],
+    #side-nav.nano-edad .nav-button-container[data-era="7"],
+    #side-nav.nano-edad .nav-button-container[data-era="8"],
+    #side-nav.nano-edad .nav-button-container[data-era="9"],
+    #side-nav.nano-edad .nav-button-container[data-era="10"],
+    #side-nav.nano-edad .nav-button-container[data-era="11"],
+    #side-nav.nano-edad .nav-button-container[data-era="12"],
+    #side-nav.nano-edad .nav-button-container[data-era="13"] {
+        display: block;
+    }
+
+    #side-nav.era-espacial .nav-button-container {
+        display: block;
     }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -218,168 +513,26 @@
         <p style="flex: 1; text-align: center;font-size: x-large;font-family: Arial black, Helvetica, sans-serif;"><span
                 id="era-name">Prehistoria</span></p>
         <div style="flex: 1; display: flex; justify-content: flex-end; padding-right: 40px;">
-            <button id="open-config">Configuración Inicial</button>
+            <button id="open-config" class="config-button">
+                <i class="fas fa-cog"></i>
+                Configuración Inicial
+            </button>
         </div>
     </nav>
 
-    <nav id="side-nav">
+
+    <nav id="side-nav" class="edad-prehistorica">
         <div class="button-grid">
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-worker"><i class="fas fa-user"></i></button>
-                <div class="resource-info">Ciudadano: 20 alimento</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-soldier"><i class="fas fa-shield-alt"></i></button>
-                <div class="resource-info">Soldado: 30 alimento, 10 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-archer"><i class="fas fa-bullseye"></i></button>
-                <div class="resource-info">Arquero: 40 alimento, 20 madera</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-cavalry"><i class="fas fa-horse"></i></button>
-                <div class="resource-info">Caballería: 50 alimento, 30 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-siege"><i class="fas fa-bomb"></i></button>
-                <div class="resource-info">Asedio: 80 madera, 60 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-priest"><i class="fas fa-cross"></i></button>
-                <div class="resource-info">Sacerdote: 50 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-scout"><i class="fas fa-eye"></i></button>
-                <div class="resource-info">Explorador: 25 alimento</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-spearman"><i class="fas fa-khanda"></i></button>
-                <div class="resource-info">Lancero: 35 alimento, 15 madera</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-catapult"><i class="fas fa-compress-arrows-alt"></i></button>
-                <div class="resource-info">Catapulta: 100 madera, 40 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-healer"><i class="fas fa-plus-square"></i></button>
-                <div class="resource-info">Curandero: 60 alimento, 30 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-warship"><i class="fas fa-ship"></i></button>
-                <div class="resource-info">Barco de guerra: 150 madera, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
-            <div class="nav-button-container">
-                <button class="nav-button" id="create-hero"><i class="fas fa-crown"></i></button>
-                <div class="resource-info">Héroe: 200 alimento, 100 oro</div>
-            </div>
+            <!-- Los botones de unidades se generarán aquí dinámicamente -->
         </div>
     </nav>
 
 
     <nav id="middle-nav">
-        <button id="advance-era">Avanzar Era</button>
+        <button id="advance-era" class="era-button">
+            <i class="fas fa-chevron-up"></i>
+            <span>Avanzar Era</span>
+        </button>
         <p>Población: <span id="population">0</span></p>
         <p>Alimento: <span id="food">0</span></p>
         <p>Madera: <span id="wood">0</span></p>
@@ -431,6 +584,12 @@
     </div>
     <div id="hover-info"></div>
     <script>
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
+        const moveSpeed = 1;
+        const cameraHeight = 100; // Altura constante de la cámara
         let scene, camera, renderer, raycaster, mouse;
         let base, resourceNodes = [], units = [], buildings = [];
         let currentEra = 0;
@@ -458,28 +617,56 @@
             gold: 0
         };
         let gameStarted = false;
-
         const buildingButtons = [
-            { id: 'build-barracks', icon: 'fas fa-fort-awesome', name: 'Cuartel', cost: '50 madera, 30 piedra' },
-            { id: 'build-farm', icon: 'fas fa-tractor', name: 'Granja', cost: '40 madera, 20 piedra' },
-            { id: 'build-mine', icon: 'fas fa-gem', name: 'Mina', cost: '60 madera, 40 piedra' },
+            // Edad Prehistórica
             { id: 'build-house', icon: 'fas fa-home', name: 'Casa', cost: '30 madera, 20 piedra' },
-            { id: 'build-market', icon: 'fas fa-store', name: 'Mercado', cost: '70 madera, 50 piedra, 20 oro' },
-            { id: 'build-temple', icon: 'fas fa-place-of-worship', name: 'Templo', cost: '100 piedra, 50 oro' },
+
+            // Edad de Piedra
+            { id: 'build-farm', icon: 'fas fa-tractor', name: 'Granja', cost: '40 madera, 20 piedra' },
+
+            // Edad de Cobre
+            { id: 'build-mine', icon: 'fas fa-gem', name: 'Mina', cost: '60 madera, 40 piedra' },
+
+            // Edad de Bronce
+            { id: 'build-barracks', icon: 'fas fa-fort-awesome', name: 'Cuartel', cost: '50 madera, 30 piedra' },
+
+            // Edad Oscura
             { id: 'build-tower', icon: 'fas fa-chess-rook', name: 'Torre', cost: '80 piedra, 40 madera' },
+
+            // Edad Media
             { id: 'build-workshop', icon: 'fas fa-hammer', name: 'Taller', cost: '80 madera, 60 piedra' },
-            { id: 'build-dock', icon: 'fas fa-ship', name: 'Muelle', cost: '100 madera, 30 piedra' },
-            { id: 'build-university', icon: 'fas fa-university', name: 'Universidad', cost: '150 piedra, 100 madera, 50 oro' },
             { id: 'build-castle', icon: 'fas fa-chess-rook', name: 'Castillo', cost: '300 piedra, 200 madera, 100 oro' },
+
+            // Renacimiento
+            { id: 'build-market', icon: 'fas fa-store', name: 'Mercado', cost: '70 madera, 50 piedra, 20 oro' },
+            { id: 'build-dock', icon: 'fas fa-ship', name: 'Muelle', cost: '100 madera, 30 piedra' },
+
+            // Edad Imperial
+            { id: 'build-temple', icon: 'fas fa-place-of-worship', name: 'Templo', cost: '100 piedra, 50 oro' },
+            { id: 'build-university', icon: 'fas fa-university', name: 'Universidad', cost: '150 piedra, 100 madera, 50 oro' },
+
+            // Edad Industrial
             { id: 'build-factory', icon: 'fas fa-industry', name: 'Fábrica', cost: '200 piedra, 150 madera, 80 oro' },
+
+            // Edad Atómica (IGM)
             { id: 'build-laboratory', icon: 'fas fa-flask', name: 'Laboratorio', cost: '180 piedra, 120 madera, 100 oro' },
-            { id: 'build-spaceport', icon: 'fas fa-rocket', name: 'Puerto Espacial', cost: '500 piedra, 300 madera, 200 oro' },
-            { id: 'build-ai-core', icon: 'fas fa-brain', name: 'Núcleo IA', cost: '500 piedra, 300 madera, 400 oro' },
+
+            // Edad Atómica (IIGM)
+            // No hay nuevos edificios en esta era
+
+            // Edad Atómica (Moderna)
             { id: 'build-quantum-computer', icon: 'fas fa-atom', name: 'Computadora Cuántica', cost: '600 piedra, 400 madera, 500 oro' },
+
+            // Edad Digital
+            { id: 'build-ai-core', icon: 'fas fa-brain', name: 'Núcleo IA', cost: '500 piedra, 300 madera, 400 oro' },
+
+            // Nano Edad
             { id: 'build-fusion-reactor', icon: 'fas fa-atom', name: 'Reactor de Fusión', cost: '700 piedra, 500 madera, 600 oro' },
+
+            // Era Espacial
+            { id: 'build-spaceport', icon: 'fas fa-rocket', name: 'Puerto Espacial', cost: '500 piedra, 300 madera, 200 oro' },
             { id: 'build-space-elevator', icon: 'fas fa-space-shuttle', name: 'Elevador Espacial', cost: '1000 piedra, 800 madera, 1000 oro' },
         ];
-
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -493,10 +680,74 @@
             createTerrain();
             setupLighting();
             setupCamera();
+            setupKeyControls();
 
-            updateEraButtons();
+            updateUnitButtons();
+            updateBuildingButtons();
         }
 
+        function setupCamera() {
+            camera.position.set(0, cameraHeight, 200);
+            camera.lookAt(0, 0, 0);
+        }
+        /* CAMARA */
+        function setupCamera() {
+            camera.position.set(0, cameraHeight, 200);
+            camera.lookAt(0, 0, 0);
+        }
+        /* CONTROLES */
+        function setupKeyControls() {
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+        }
+        function onKeyDown(event) {
+            switch (event.keyCode) {
+                case 87: // W
+                    moveForward = true;
+                    break;
+                case 83: // S
+                    moveBackward = true;
+                    break;
+                case 65: // A
+                    moveLeft = true;
+                    break;
+                case 68: // D
+                    moveRight = true;
+                    break;
+            }
+        }
+        function onKeyUp(event) {
+            switch (event.keyCode) {
+                case 87: // W
+                    moveForward = false;
+                    break;
+                case 83: // S
+                    moveBackward = false;
+                    break;
+                case 65: // A
+                    moveLeft = false;
+                    break;
+                case 68: // D
+                    moveRight = false;
+                    break;
+            }
+        }
+        function updateCamera() {
+            if (moveForward) camera.position.z -= moveSpeed;
+            if (moveBackward) camera.position.z += moveSpeed;
+            if (moveLeft) camera.position.x -= moveSpeed;
+            if (moveRight) camera.position.x += moveSpeed;
+
+            camera.position.y = cameraHeight; // Mantener altura constante
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateCamera();
+            renderer.render(scene, camera);
+        }
+
+        /* TeRRENO */
         function createTerrain() {
             const geometry = new THREE.PlaneGeometry(1000, 1000);
             const material = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
@@ -504,7 +755,7 @@
             terrain.rotation.x = -Math.PI / 2;
             scene.add(terrain);
         }
-
+        /* LUZ */
         function setupLighting() {
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
@@ -514,43 +765,110 @@
             scene.add(directionalLight);
         }
 
-        function setupCamera() {
-            camera.position.set(0, 100, 200);
-            camera.lookAt(0, 0, 0);
+        function updateUnitButtons() {
+            console.log('Actualizando botones de unidades. Era actual:', currentEra);
+            const buttonGrid = document.querySelector('#side-nav .button-grid');
+            if (!buttonGrid) {
+                console.error('No se encontró el elemento .button-grid dentro de #side-nav');
+                return;
+            }
+            buttonGrid.innerHTML = ''; // Limpiar botones existentes
+
+            const unitButtons = [
+                { id: 'create-worker', icon: 'fas fa-user', name: 'Ciudadano', cost: '20 alimento', era: 0 },
+                { id: 'create-worker', icon: 'fas fa-user', name: 'Ciudadano', cost: '20 alimento', era: 0 },
+                { id: 'create-scout', icon: 'fas fa-eye', name: 'Explorador', cost: '25 alimento', era: 3 },
+                { id: 'create-soldier', icon: 'fas fa-shield-alt', name: 'Soldado', cost: '30 alimento, 10 oro', era: 3 },
+                { id: 'create-archer', icon: 'fas fa-bullseye', name: 'Arquero', cost: '40 alimento, 20 madera', era: 3 },
+                { id: 'create-spearman', icon: 'fas fa-khanda', name: 'Lancero', cost: '35 alimento, 15 madera', era: 3 },
+                { id: 'create-cavalry', icon: 'fas fa-horse', name: 'Caballería', cost: '50 alimento, 30 oro', era: 4 },
+                { id: 'create-catapult', icon: 'fas fa-compress-arrows-alt', name: 'Catapulta', cost: '100 madera, 40 oro', era: 4 },
+                { id: 'create-knight', icon: 'fas fa-chess-knight', name: 'Caballero', cost: '60 alimento, 40 oro', era: 5 },
+                { id: 'create-longbowman', icon: 'fas fa-bullseye', name: 'Arquero largo', cost: '45 alimento, 30 madera', era: 5 },
+                { id: 'create-pikeman', icon: 'fas fa-khanda', name: 'Piquero', cost: '40 alimento, 25 madera', era: 5 },
+                { id: 'create-crossbowman', icon: 'fas fa-crosshairs', name: 'Ballestero', cost: '40 alimento, 35 madera', era: 6 },
+                { id: 'create-halberdier', icon: 'fas fa-axe', name: 'Alabardero', cost: '45 alimento, 30 madera', era: 6 },
+                { id: 'create-cannon', icon: 'fas fa-bomb', name: 'Cañón', cost: '120 madera, 60 oro', era: 7 },
+                { id: 'create-musketeer', icon: 'fas fa-gun', name: 'Mosquetero', cost: '50 alimento, 30 oro', era: 7 },
+                { id: 'create-dragoon', icon: 'fas fa-horse', name: 'Dragón', cost: '60 alimento, 40 oro', era: 7 },
+                { id: 'create-rifleman', icon: 'fas fa-user-secret', name: 'Fusilero', cost: '40 alimento, 40 oro', era: 8 },
+                { id: 'create-grenadier', icon: 'fas fa-bomb', name: 'Granadero', cost: '50 alimento, 35 oro', era: 8 },
+                { id: 'create-cavalry-officer', icon: 'fas fa-horse', name: 'Oficial de caballería', cost: '70 alimento, 50 oro', era: 8 },
+                { id: 'create-field-gun', icon: 'fas fa-bullseye', name: 'Cañón de campaña', cost: '140 madera, 80 oro', era: 8 },
+                { id: 'create-tank', icon: 'fas fa-truck-monster', name: 'Tanque', cost: '150 oro, 50 piedra', era: 9 },
+                { id: 'create-machine-gunner', icon: 'fas fa-user-secret', name: 'Ametrallador', cost: '60 alimento, 50 oro', era: 9 },
+                { id: 'create-mortar', icon: 'fas fa-bomb', name: 'Mortero', cost: '100 madera, 70 oro', era: 9 },
+                { id: 'create-fighter', icon: 'fas fa-fighter-jet', name: 'Caza', cost: '200 oro, 100 piedra', era: 10 },
+                { id: 'create-bomber', icon: 'fas fa-plane', name: 'Bombardero', cost: '250 oro, 120 piedra', era: 10 },
+                { id: 'create-anti-air', icon: 'fas fa-crosshairs', name: 'Antiaéreo', cost: '180 oro, 90 piedra', era: 10 },
+                { id: 'create-submarine', icon: 'fas fa-ship', name: 'Submarino', cost: '300 oro, 150 piedra', era: 10 },
+                { id: 'create-destroyer', icon: 'fas fa-ship', name: 'Destructor', cost: '350 oro, 200 piedra', era: 10 },
+                { id: 'create-helicopter', icon: 'fas fa-helicopter', name: 'Helicóptero', cost: '180 oro, 80 piedra', era: 11 },
+                { id: 'create-missile', icon: 'fas fa-rocket', name: 'Misil', cost: '300 oro, 150 piedra', era: 11 },
+                { id: 'create-special-forces', icon: 'fas fa-user-ninja', name: 'Fuerzas especiales', cost: '100 alimento, 80 oro', era: 11 },
+                { id: 'create-aircraft-carrier', icon: 'fas fa-ship', name: 'Portaaviones', cost: '500 oro, 300 piedra', era: 11 },
+                { id: 'create-drone', icon: 'fas fa-robot', name: 'Dron', cost: '150 oro, 100 piedra', era: 12 },
+                { id: 'create-cyborg', icon: 'fas fa-user-astronaut', name: 'Ciborg', cost: '200 oro, 100 piedra', era: 12 },
+                { id: 'create-stealth-bomber', icon: 'fas fa-plane', name: 'Bombardero sigiloso', cost: '300 oro, 150 piedra', era: 12 },
+                { id: 'create-railgun', icon: 'fas fa-bolt', name: 'Cañón electromagnético', cost: '400 oro, 200 piedra', era: 12 },
+                { id: 'create-nanobot', icon: 'fas fa-microchip', name: 'Nanobot', cost: '200 oro, 150 piedra', era: 13 },
+                { id: 'create-mech', icon: 'fas fa-robot', name: 'Mecha', cost: '300 oro, 200 piedra', era: 13 },
+                { id: 'create-plasma-tank', icon: 'fas fa-atom', name: 'Tanque de plasma', cost: '350 oro, 250 piedra', era: 13 },
+                { id: 'create-energy-shield', icon: 'fas fa-shield-alt', name: 'Escudo de energía', cost: '250 oro, 150 piedra', era: 13 },
+                { id: 'create-spaceship', icon: 'fas fa-rocket', name: 'Nave espacial', cost: '500 oro, 300 piedra', era: 14 },
+                { id: 'create-starfighter', icon: 'fas fa-user-astronaut', name: 'Caza estelar', cost: '400 oro, 250 piedra', era: 14 },
+                { id: 'create-orbital-cannon', icon: 'fas fa-satellite', name: 'Cañón orbital', cost: '600 oro, 400 piedra', era: 14 },
+                { id: 'create-gravity-manipulator', icon: 'fas fa-globe', name: 'Manipulador gravitacional', cost: '550 oro, 350 piedra', era: 14 },
+                { id: 'create-time-distorter', icon: 'fas fa-hourglass', name: 'Distorsionador temporal', cost: '700 oro, 500 piedra', era: 14 },
+            ];
+
+            for (let button of unitButtons) {
+                if (button.era <= currentEra) {
+const buttonHTML = `
+    <div class="nav-button-container" data-era="${button.era}">
+        <button class="nav-button" id="${button.id}"><i class="${button.icon}"></i></button>
+        <div class="resource-info">${button.name}: ${button.cost}</div>
+    </div>
+`;
+                    buttonGrid.innerHTML += buttonHTML;
+                }
+            }
+
+            addUnitEventListeners();
         }
 
-        function updateEraButtons() {
+        function updateBuildingButtons() {
             const buttonGrid = document.querySelector('#bottom-nav .button-grid');
             buttonGrid.innerHTML = ''; // Limpiar botones existentes
 
             let numButtons;
             switch (currentEra) {
-                case 0: numButtons = 0; break; // Edad Prehistórica
+                case 0: numButtons = 1; break; // Edad Prehistórica
                 case 1: numButtons = 2; break; // Edad de Piedra
-                case 2: numButtons = 4; break; // Edad de Cobre
-                case 3: numButtons = 6; break; // Edad de Bronce
-                case 4: numButtons = 8; break; // Edad Oscura
-                case 5: numButtons = 10; break; // Edad Media
-                case 6: numButtons = 12; break; // Renacimiento
-                case 7: numButtons = 14; break;//Edad Imperial
-                case 8: numButtons = 16; break;//Edad Industrial
-                case 9: numButtons = 18; break;//Edad Atómica (IGM)
-                case 10: numButtons = 18; break;//Edad Atómica (IIGM)
-                case 11: numButtons = 18; break;//Edad Atómica (Moderna)
-                case 12: numButtons = 18; break;//Edad Digital
-                case 13: numButtons = 18; break;//Nano Edad
-                case 14: numButtons = 18; break;//Era Espacial
-                default: numButtons = buildingButtons.length; break; // Edades posteriores
+                case 2: numButtons = 3; break; // Edad de Cobre
+                case 3: numButtons = 4; break; // Edad de Bronce
+                case 4: numButtons = 5; break; // Edad Oscura
+                case 5: numButtons = 7; break; // Edad Media
+                case 6: numButtons = 9; break; // Renacimiento
+                case 7: numButtons = 11; break; // Edad Imperial
+                case 8: numButtons = 12; break; // Edad Industrial
+                case 9: numButtons = 13; break; // Edad Atómica (IGM)
+                case 10: numButtons = 13; break; // Edad Atómica (IIGM)
+                case 11: numButtons = 14; break; // Edad Atómica (Moderna)
+                case 12: numButtons = 15; break; // Edad Digital
+                case 13: numButtons = 16; break; // Nano Edad
+                case 14: numButtons = 18; break; // Era Espacial
+                default: numButtons = buildingButtons.length; break;
             }
 
             for (let i = 0; i < numButtons && i < buildingButtons.length; i++) {
                 const button = buildingButtons[i];
                 const buttonHTML = `
-            <div class="nav-button-container">
-                <button class="nav-button" id="${button.id}"><i class="${button.icon}"></i></button>
-                <div class="resource-info">${button.name}: ${button.cost}</div>
-            </div>
-        `;
+                    <div class="nav-button-container">
+                        <button class="nav-button" id="${button.id}"><i class="${button.icon}"></i></button>
+                        <div class="resource-info">${button.name}: ${button.cost}</div>
+                    </div>
+                `;
                 buttonGrid.innerHTML += buttonHTML;
             }
 
@@ -561,6 +879,13 @@
             buttonGrid.style.gridTemplateRows = `repeat(${rows}, 45px)`;
 
             addBuildingEventListeners();
+        }
+
+        function addUnitEventListeners() {
+            const unitButtons = document.querySelectorAll('#side-nav .nav-button');
+            unitButtons.forEach(button => {
+                button.addEventListener('click', () => createUnit(button.id.replace('create-', '')));
+            });
         }
 
         function addBuildingEventListeners() {
@@ -591,7 +916,10 @@
                 const bottomNav = document.getElementById('bottom-nav');
                 bottomNav.className = eras[currentEra].name.toLowerCase().replace(/ /g, '-');
 
-                updateEraButtons();
+                const sideNav = document.getElementById('side-nav');
+                sideNav.className = eras[currentEra].name.toLowerCase().replace(/ /g, '-');
+                updateUnitButtons();
+                updateBuildingButtons();
             }
         }
 
@@ -615,7 +943,8 @@
             base = new Base();
             animate();
 
-            updateEraButtons();
+            updateUnitButtons();
+            updateBuildingButtons();
         }
 
         class Base {
@@ -881,8 +1210,6 @@
         }
 
         // Event Listeners
-        document.getElementById('create-worker').addEventListener('click', () => createUnit('worker'));
-        document.getElementById('create-soldier').addEventListener('click', () => createUnit('soldier'));
         document.getElementById('advance-era').addEventListener('click', advanceEra);
         document.getElementById('open-config').addEventListener('click', () => {
             document.getElementById('config-menu').style.display = 'block';
@@ -895,11 +1222,13 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        // Llame a updateUnitButtons() cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUnitButtons();
+        });
+
         init();
     </script>
-</body>
-
-</html>
 </body>
 
 </html>
