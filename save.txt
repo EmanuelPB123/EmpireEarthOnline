@@ -1,1 +1,863 @@
+<html>
+
+<head></head>
+
+<body>
+    <!DOCTYPE html>
+    <html lang="es">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Empire Earth Web</title>
+        <style>
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                font-family: Arial, sans-serif;
+            }
+
+            #game-container {
+                width: 100%;
+                height: 100%;
+            }
+
+            #hud {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                max-width: 300px;
+                font-size: 12px;
+            }
+
+            button {
+                margin: 5px;
+                padding: 5px 10px;
+                cursor: pointer;
+            }
+
+            #config-menu {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+            }
+
+            #config-menu input {
+                width: 50px;
+                margin-right: 10px;
+            }
+
+            #config-menu button {
+                margin-top: 20px;
+            }
+
+            #controls-info {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 10px;
+            }
+
+            #hover-info {
+                position: absolute;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 14px;
+                pointer-events: none;
+                display: none;
+            }
+
+            #building-menu {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                max-width: 200px;
+                font-size: 12px;
+            }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    </head>
+
+    <body>
+        <div id="game-container"></div>
+        <div id="hud">
+            <p>Era: <span id="era-name">Prehistoria</span></p>
+            <p>Población: <span id="population">0</span></p>
+            <p>Recursos:</p>
+            <ul>
+                <li>Alimento: <span id="food">0</span></li>
+                <li>Madera: <span id="wood">0</span></li>
+                <li>Piedra: <span id="stone">0</span></li>
+                <li>Oro: <span id="gold">0</span></li>
+            </ul>
+            <button id="create-worker">Ciudadano</button>
+            <p>20 alimento</p>
+            <button id="create-soldier">Soldado</button>
+            <p>30 alimento, 10 oro</p>
+            <button id="advance-era">Avanzar Era</button>
+            <p>100 alimento, 50 otros</p>
+            <button id="open-config">Configuración de Partida</button>
+        </div>
+        <div id="building-menu">
+            <h3>Construir Edificios</h3>
+            <button id="build-barracks">Cuartel</button>
+            <p>50 madera, 30 piedra</p>
+            <button id="build-farm">Granja</button>
+            <p>40 madera, 20 piedra</p>
+            <button id="build-mine">Mina</button>
+            <p>60 madera, 40 piedra</p>
+        </div>
+        <div id="config-menu" style="display: none;">
+            <h3>Configuración de Partida</h3>
+            <p>
+                <label for="initial-food">Alimento inicial:</label>
+                <input type="number" id="initial-food" value="400">
+            </p>
+            <p>
+                <label for="initial-wood">Madera inicial:</label>
+                <input type="number" id="initial-wood" value="200">
+            </p>
+            <p>
+                <label for="initial-stone">Piedra inicial:</label>
+                <input type="number" id="initial-stone" value="200">
+            </p>
+            <p>
+                <label for="initial-gold">Oro inicial:</label>
+                <input type="number" id="initial-gold" value="200">
+            </p>
+            <p>
+                <label for="food-nodes">Alimento:</label>
+                <input type="number" id="food-nodes" value="10">
+            </p>
+            <p>
+                <label for="wood-nodes">Madera:</label>
+                <input type="number" id="wood-nodes" value="50">
+            </p>
+            <p>
+                <label for="stone-nodes">Piedra:</label>
+                <input type="number" id="stone-nodes" value="40">
+            </p>
+            <p>
+                <label for="gold-nodes">Oro:</label>
+                <input type="number" id="gold-nodes" value="30">
+            </p>
+            <button id="start-game">Comenzar Partida</button>
+        </div>
+        <div id="controls-info">
+            Controles: W (Adelante), S (Atrás), A (Izquierda), D (Derecha)
+        </div>
+        <div id="hover-info"></div>
+        <script>
+            let scene, camera, renderer, raycaster, mouse;
+            let base, resourceNodes = [], units = [], buildings = [];
+            let currentEra = 0;
+            const eras = [
+                { name: 'Edad Prehistórica', color: 0x8B4513 },
+                { name: 'Edad de Piedra', color: 0x8B4513 },
+                { name: 'Edad de Cobre', color: 0x8B4513 },
+                { name: 'Edad de Bronce', color: 0x8B4513 },
+                { name: 'Edad Oscura', color: 0x8B4513 },
+                { name: 'Edad Media', color: 0x8B4513 },
+                { name: 'Renacimiento', color: 0x8B4513 },
+                { name: 'Edad Imperial', color: 0x8B4513 },
+                { name: 'Edad Industrial', color: 0x8B4513 },
+                { name: 'Edad Atómica (IGM)', color: 0x8B4513 },
+                { name: 'Edad Atómica (IIGM)', color: 0x8B4513 },
+                { name: 'Edad Atómica (Moderna)', color: 0x8B4513 },
+                { name: 'Edad Digital', color: 0x8B4513 },
+                { name: 'Nano Edad', color: 0x8B4513 },
+                { name: 'Era Espacial', color: 0x8B4513 }
+            ];
+            let resources = {
+                food: 0,
+                wood: 0,
+                stone: 0,
+                gold: 0
+            };
+            let gameStarted = false;
+
+            // Variables para el movimiento de la cámara
+            let moveForward = false;
+            let moveBackward = false;
+            let moveLeft = false;
+            let moveRight = false;
+            let rotateLeft = false;
+            let rotateRight = false;
+            let cameraMoveSpeed = 1;
+            let cameraRotateSpeed = 0.02;
+            const cameraHeight = 50;
+
+            document.getElementById("start-game").addEventListener("click", function () {
+                // Oculta el botón de configuración
+                document.getElementById("open-config").style.display = "none";
+            });
+
+            function init() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.getElementById('game-container').appendChild(renderer.domElement);
+
+                raycaster = new THREE.Raycaster();
+                mouse = new THREE.Vector2();
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+                directionalLight.position.set(0, 1, 0);
+                scene.add(directionalLight);
+
+                camera.position.set(0, cameraHeight, 100);
+                camera.lookAt(0, 0, 0);
+
+                createTerrain();
+                setupKeyControls();
+                setupMouseEvents();
+            }
+/* terreno */
+            function createTerrain() {
+                const geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x4CAF50,
+                    side: THREE.DoubleSide,
+                    flatShading: true,
+                });
+                const terrain = new THREE.Mesh(geometry, material);
+                terrain.rotation.x = -Math.PI / 2;
+                scene.add(terrain);
+            }
+
+            function setupKeyControls() {
+                document.addEventListener('keydown', onKeyDown, false);
+                document.addEventListener('keyup', onKeyUp, false);
+            }
+
+            function setupMouseEvents() {
+                renderer.domElement.addEventListener('mousemove', onMouseMove, false);
+            }
+
+            function onMouseMove(event) {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                checkHover();
+            }
+
+            function checkHover() {
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+
+                if (intersects.length > 0) {
+                    const object = intersects[0].object;
+                    const hoverInfo = document.getElementById('hover-info');
+
+                    if (object.userData.type) {
+                        let info = '';
+                        switch (object.userData.type) {
+                            case 'base':
+                                info = `Capitolio`;
+                                break;
+                            case 'resource':
+                                info = `${capitalize(object.userData.resourceType)}\nCantidad: ${object.userData.amount}`;
+                                break;
+                            case 'unit':
+                                info = `${capitalize(object.userData.unitType)}\nEra: ${eras[currentEra].name}\nCargando: ${object.userData.carrying}/${object.userData.maxCarry}`;
+                                break;
+                            case 'building':
+                                info = `${capitalize(object.userData.buildingType)}`;
+                                break;
+                        }
+
+                        hoverInfo.textContent = info;
+                        hoverInfo.style.display = 'block';
+                        hoverInfo.style.left = `${event.clientX + 10}px`;
+                        hoverInfo.style.top = `${event.clientY + 10}px`;
+                    } else {
+                        hoverInfo.style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('hover-info').style.display = 'none';
+                }
+            }
+
+            function capitalize(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            function onKeyDown(event) {
+                switch (event.code) {
+                    case 'KeyW':
+                        moveForward = true;
+                        break;
+                    case 'KeyS':
+                        moveBackward = true;
+                        break;
+                    case 'KeyA':
+                        moveRight = true;
+                        break;
+                    case 'KeyD':
+                        moveLeft = true;
+                        break;
+                }
+            }
+
+            function onKeyUp(event) {
+                switch (event.code) {
+                    case 'KeyW':
+                        moveForward = false;
+                        break;
+                    case 'KeyS':
+                        moveBackward = false;
+                        break;
+                    case 'KeyA':
+                        moveRight = false;
+                        break;
+                    case 'KeyD':
+                        moveLeft = false;
+                        break;
+                }
+            }
+
+            function updateCameraPosition() {
+                const cameraDirection = new THREE.Vector3();
+                camera.getWorldDirection(cameraDirection);
+                cameraDirection.y = 0;
+                cameraDirection.normalize();
+
+                const cameraRight = new THREE.Vector3();
+                cameraRight.crossVectors(camera.up, cameraDirection).normalize();
+
+                if (moveForward) {
+                    camera.position.addScaledVector(cameraDirection, cameraMoveSpeed);
+                }
+                if (moveBackward) {
+                    camera.position.addScaledVector(cameraDirection, -cameraMoveSpeed);
+                }
+                if (moveLeft) {
+                    camera.position.addScaledVector(cameraRight, -cameraMoveSpeed);
+                }
+                if (moveRight) {
+                    camera.position.addScaledVector(cameraRight, cameraMoveSpeed);
+                }
+
+                camera.position.y = cameraHeight;
+
+            }
+
+            class Base {
+    constructor() {
+        this.level = 1;
+        this.mesh = this.createMesh();
+        scene.add(this.mesh);
+    }
+
+    createMesh() {
+        let geometry;
+
+        // Cambiar la geometría dependiendo de la era actual
+        switch (currentEra) {
+            case 0: // Edad Prehistórica
+                geometry = new THREE.ConeGeometry(10, 20, 4);
+                break;
+            case 1: // Edad de Piedra
+                geometry = new THREE.BoxGeometry(15, 15, 15);
+                break;
+            case 2: // Edad de Cobre
+                geometry = new THREE.CylinderGeometry(10, 15, 30, 32);
+                break;
+            case 3: // Edad de Bronce
+                geometry = new THREE.SphereGeometry(10, 32, 32);
+                break;
+            case 4: // Edad Oscura
+                geometry = new THREE.TetrahedronGeometry(15);
+                break;
+            // Añadir más casos para otras eras
+            default:
+                geometry = new THREE.ConeGeometry(10, 20, 4);
+                break;
+        }
+
+        const material = new THREE.MeshPhongMaterial({ color: eras[currentEra].color });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData = { type: 'base', level: this.level };
+        return mesh;
+    }
+
+    upgrade() {
+        if (this.level < 5) {
+            this.level++;
+            scene.remove(this.mesh);
+            this.mesh = this.createMesh();
+            this.mesh.scale.set(1 + this.level * 0.2, 1 + this.level * 0.2, 1 + this.level * 0.2);
+            scene.add(this.mesh);
+        }
+    }
+}
+
+            class ResourceNode {
+                constructor(type) {
+                    this.type = type;
+                    this.amount = this.getInitialAmount();
+                    this.mesh = this.createMesh();
+                    scene.add(this.mesh);
+                }
+
+                getInitialAmount() {
+                    switch (this.type) {
+                        case 'food': return 1000;
+                        case 'wood': return 800;
+                        case 'stone': return 600;
+                        case 'gold': return 400;
+                    }
+                }
+
+                createMesh() {
+                    let geometry, material;
+                    switch (this.type) {
+                        case 'food':
+                            geometry = new THREE.SphereGeometry(3, 32, 32);
+                            material = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
+                            break;
+                        case 'wood':
+                            geometry = new THREE.CylinderGeometry(2, 2, 8, 8);
+                            material = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+                            break;
+                        case 'stone':
+                            geometry = new THREE.DodecahedronGeometry(3);
+                            material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+                            break;
+                        case 'gold':
+                            geometry = new THREE.OctahedronGeometry(2);
+                            material = new THREE.MeshPhongMaterial({ color: 0xFFD700 });
+                            break;
+                    }
+                                        /* distribucion recursos */
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set(
+                        (Math.random() - 0.5) * 2000,
+                        5,
+                        (Math.random() - 0.5) * 2000
+                    );
+                    mesh.userData = { type: 'resource', resourceType: this.type, amount: this.amount };
+                    return mesh;
+                }
+            }
+            /* Unidades */
+            class Unit {
+                constructor(type) {
+                    this.type = type;
+                    this.mesh = this.createMesh();
+                    this.speed = 0.5;
+                    this.targetNode = null;
+                    this.carrying = 0;
+                    this.maxCarry = 10;
+                    scene.add(this.mesh);
+                }
+
+                createMesh() {
+                    let geometry, material;
+                    switch (currentEra) {
+                        case 0: // Edad Prehistórica
+                            geometry = new THREE.BoxGeometry(2, 4, 2);
+                            break;
+                        case 1: // Edad de Piedra
+                            geometry = new THREE.CylinderGeometry(1, 1.5, 4, 8);
+                            break;
+                        case 2: // Edad de Cobre
+                            geometry = new THREE.SphereGeometry(1.5, 16, 16);
+                            break;
+                        case 3: // Edad de Bronce
+                            geometry = new THREE.ConeGeometry(1.5, 4, 8);
+                            break;
+                        case 4: // Edad Oscura
+                            geometry = new THREE.TorusGeometry(1.5, 0.5, 16, 100);
+                            break;
+                        case 5: // Edad Media
+                            geometry = new THREE.TetrahedronGeometry(2);
+                            break;
+                        case 6: // Renacimiento
+                            geometry = new THREE.OctahedronGeometry(2);
+                            break;
+                        case 7: // Edad Imperial
+                            geometry = new THREE.DodecahedronGeometry(1.5);
+                            break;
+                        case 8: // Edad Industrial
+                            geometry = new THREE.IcosahedronGeometry(1.5);
+                            break;
+                        case 9: // Edad Atómica (IGM)
+                            geometry = new THREE.RingGeometry(1, 1.5, 32);
+                            break;
+                        case 10: // Edad Atómica (IIGM)
+                            geometry = new THREE.TorusKnotGeometry(1.5, 0.5, 100, 16);
+                            break;
+                        case 11: // Edad Atómica (Moderna)
+                            geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+                            break;
+                        case 12: // Edad Digital
+                            geometry = new THREE.CylinderGeometry(1, 1, 4, 16);
+                            break;
+                        case 13: // Nano Edad
+                            geometry = new THREE.SphereGeometry(1, 32, 32);
+                            break;
+                        case 14: // Era Espacial
+                            geometry = new THREE.DodecahedronGeometry(2);
+                            break;
+                    }
+
+                    let color;
+                    switch (this.type) {
+                        case 'worker':
+                            color = 0x0000FF;
+                            break;
+                        case 'soldier':
+                            color = 0xFF0000;
+                            break;
+                        case 'farmer':
+                            color = 0x00FF00;
+                            break;
+                        case 'miner':
+                            color = 0xFFFF00;
+                            break;
+                        default:
+                            color = 0x0000FF;
+                    }
+                    /* distribucion unidades */
+                    material = new THREE.MeshPhongMaterial({ color: color });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set((Math.random() - 0.5) * 2000, 2, (Math.random() - 0.5) * 2000);
+                    mesh.userData = { type: 'unit', unitType: this.type, carrying: this.carrying, maxCarry: this.maxCarry };
+                    return mesh;
+                }
+
+                update() {
+                    if (this.carrying >= this.maxCarry) {
+                        this.returnToBase();
+                    } else if (!this.targetNode) {
+                        this.findNewTarget();
+                    } else {
+                        this.moveToTarget();
+                        this.harvestResource();
+                    }
+                    this.updateMeshData();
+                }
+
+                updateMeshData() {
+                    this.mesh.userData.carrying = this.carrying;
+                }
+
+                findNewTarget() {
+                    if (this.type === 'worker' && resourceNodes.length > 0) {
+                        this.targetNode = resourceNodes[Math.floor(Math.random() * resourceNodes.length)];
+                    } else {
+                        const randomPosition = new THREE.Vector3(
+                            (Math.random() - 0.5) * 200,
+                            2,
+                            (Math.random() - 0.5) * 200
+                        );
+                        this.targetNode = { mesh: { position: randomPosition } };
+                    }
+                }
+
+                moveToTarget() {
+                    if (this.targetNode && this.targetNode.mesh) {
+                        const direction = new THREE.Vector3().subVectors(this.targetNode.mesh.position, this.mesh.position);
+                        if (direction.length() > this.speed) {
+                            direction.normalize();
+                            this.mesh.position.add(direction.multiplyScalar(this.speed));
+                            this.mesh.lookAt(this.targetNode.mesh.position);
+                        } else {
+                            this.mesh.position.copy(this.targetNode.mesh.position);
+                        }
+                    }
+                }
+
+                harvestResource() {
+                    if (this.type === 'worker' && this.targetNode && this.targetNode.mesh &&
+                        this.mesh.position.distanceTo(this.targetNode.mesh.position) < 3) {
+                        if (this.targetNode.amount > 0 && this.carrying < this.maxCarry) {
+                            const harvestAmount = Math.min(1, this.targetNode.amount, this.maxCarry - this.carrying);
+                            this.targetNode.amount -= harvestAmount;
+                            this.carrying += harvestAmount;
+
+                            this.targetNode.mesh.userData.amount = this.targetNode.amount;
+
+                            if (this.targetNode.amount <= 0) {
+                                const index = resourceNodes.indexOf(this.targetNode);
+                                if (index > -1) {
+                                    scene.remove(this.targetNode.mesh);
+                                    resourceNodes.splice(index, 1);
+                                }
+                                this.targetNode = null;
+                            }
+                        }
+                    }
+                }
+
+                returnToBase() {
+                    const basePosition = new THREE.Vector3(0, 2, 0);
+                    const direction = new THREE.Vector3().subVectors(basePosition, this.mesh.position);
+                    if (direction.length() > this.speed) {
+                        direction.normalize();
+                        this.mesh.position.add(direction.multiplyScalar(this.speed));
+                        this.mesh.lookAt(basePosition);
+                    } else {
+                        if (this.targetNode && this.targetNode.type) {
+                            resources[this.targetNode.type] += this.carrying;
+                        }
+                        this.carrying = 0;
+                        this.targetNode = null;
+                        updateResourceDisplay();
+                    }
+                }
+
+                evolve() {
+                    scene.remove(this.mesh);
+                    this.mesh = this.createMesh();
+                    scene.add(this.mesh);
+                }
+            }
+            /* Edificios */
+            class Building {
+                constructor(type, position) {
+                    this.type = type;
+                    this.mesh = this.createMesh(position);
+                    this.productionTimer = 0;
+                    scene.add(this.mesh);
+                }
+
+                createMesh(position) {
+                    let geometry, material;
+                    switch (this.type) {
+                        case 'barracks':
+                            geometry = new THREE.BoxGeometry(10, 8, 10);
+                            material = new THREE.MeshPhongMaterial({ color: 0x8B0000 });
+                            break;
+                        case 'farm':
+                            geometry = new THREE.CylinderGeometry(5, 5, 6, 8);
+                            material = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+                            break;
+                        case 'mine':
+                            geometry = new THREE.ConeGeometry(5, 10, 4);
+                            material = new THREE.MeshPhongMaterial({ color: 0x708090 });
+                            break;
+                    }
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.copy(position);
+                    mesh.position.y = 3;
+                    mesh.userData = { type: 'building', buildingType: this.type };
+                    return mesh;
+                }
+
+                update() {
+                    this.productionTimer++;
+                    if (this.productionTimer >= 300) {
+                        this.produce();
+                        this.productionTimer = 0;
+                    }
+                }
+
+                produce() {
+                    switch (this.type) {
+                        case 'barracks':
+                            if (resources.food >= 30 && resources.gold >= 10) {
+                                resources.food -= 30;
+                                resources.gold -= 10;
+                                createUnit('soldier');
+                            }
+                            break;
+                        case 'farm':
+                            resources.food += 5;
+                            break;
+                        case 'mine':
+                            resources.stone += 3;
+                            resources.gold += 1;
+                            break;
+                    }
+                    updateResourceDisplay();
+                }
+            }
+            /* Crear unidad */
+            function createUnit(type) {
+                let canCreate = false;
+                switch (type) {
+                    case 'worker':
+                        canCreate = resources.food >= 20;
+                        if (canCreate) resources.food -= 20;
+                        break;
+                    case 'soldier':
+                        canCreate = resources.food >= 30 && resources.gold >= 10;
+                        if (canCreate) {
+                            resources.food -= 30;
+                            resources.gold -= 10;
+                        }
+                        break;
+                    case 'farmer':
+                        canCreate = resources.food >= 25;
+                        if (canCreate) resources.food -= 25;
+                        break;
+                    case 'miner':
+                        canCreate = resources.food >= 25 && resources.stone >= 10;
+                        if (canCreate) {
+                            resources.food -= 25;
+                            resources.stone -= 10;
+                        }
+                        break;
+                }
+
+                if (canCreate) {
+                    units.push(new Unit(type));
+                    updateResourceDisplay();
+                    updatePopulation();
+                }
+            }
+
+            function createBuilding(type) {
+                let canBuild = false;
+                const position = new THREE.Vector3((Math.random() - 0.5) * 200, 0, (Math.random() - 0.5) * 200);
+
+                switch (type) {
+                    case 'barracks':
+                        canBuild = resources.wood >= 50 && resources.stone >= 30;
+                        if (canBuild) {
+                            resources.wood -= 50;
+                            resources.stone -= 30;
+                        }
+                        break;
+                    case 'farm':
+                        canBuild = resources.wood >= 40 && resources.stone >= 20;
+                        if (canBuild) {
+                            resources.wood -= 40;
+                            resources.stone -= 20;
+                        }
+                        break;
+                    case 'mine':
+                        canBuild = resources.wood >= 60 && resources.stone >= 40;
+                        if (canBuild) {
+                            resources.wood -= 60;
+                            resources.stone -= 40;
+                        }
+                        break;
+                }
+
+                if (canBuild) {
+                    buildings.push(new Building(type, position));
+                    updateResourceDisplay();
+                }
+            }
+            /* Avanzar era */
+            function advanceEra() {
+                if (currentEra < eras.length - 1 &&
+                    resources.food >= 100 && resources.wood >= 50 && resources.stone >= 50 && resources.gold >= 50) {
+                    resources.food -= 100;
+                    resources.wood -= 50;
+                    resources.stone -= 50;
+                    resources.gold -= 50;
+
+                    currentEra++;
+                    document.getElementById('era-name').textContent = eras[currentEra].name;
+                    scene.background = new THREE.Color(eras[currentEra].color);
+
+                    base.upgrade();
+                    units.forEach(unit => unit.evolve());
+                    updateResourceDisplay();
+                }
+            }
+
+            function updateResourceDisplay() {
+                for (let resource in resources) {
+                    document.getElementById(resource).textContent = resources[resource];
+                }
+            }
+
+            function updatePopulation() {
+                document.getElementById('population').textContent = units.length;
+            }
+
+            function createResourceNodes() {
+                const foodNodes = parseInt(document.getElementById('food-nodes').value);
+                const woodNodes = parseInt(document.getElementById('wood-nodes').value);
+                const stoneNodes = parseInt(document.getElementById('stone-nodes').value);
+                const goldNodes = parseInt(document.getElementById('gold-nodes').value);
+
+                for (let i = 0; i < foodNodes; i++) resourceNodes.push(new ResourceNode('food'));
+                for (let i = 0; i < woodNodes; i++) resourceNodes.push(new ResourceNode('wood'));
+                for (let i = 0; i < stoneNodes; i++) resourceNodes.push(new ResourceNode('stone'));
+                for (let i = 0; i < goldNodes; i++) resourceNodes.push(new ResourceNode('gold'));
+            }
+
+            function startGame() {
+                resources.food = parseInt(document.getElementById('initial-food').value);
+                resources.wood = parseInt(document.getElementById('initial-wood').value);
+                resources.stone = parseInt(document.getElementById('initial-stone').value);
+                resources.gold = parseInt(document.getElementById('initial-gold').value);
+
+                createResourceNodes();
+                updateResourceDisplay();
+                document.getElementById('config-menu').style.display = 'none';
+                gameStarted = true;
+                base = new Base();
+                animate();
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                if (gameStarted) {
+                    units.forEach(unit => unit.update());
+                    buildings.forEach(building => building.update());
+                    updateCameraPosition();
+                }
+                renderer.render(scene, camera);
+            }
+
+            init();
+
+            document.getElementById('create-worker').addEventListener('click', () => createUnit('worker'));
+            document.getElementById('create-soldier').addEventListener('click', () => createUnit('soldier'));
+            document.getElementById('advance-era').addEventListener('click', advanceEra);
+            document.getElementById('open-config').addEventListener('click', () => {
+                document.getElementById('config-menu').style.display = 'block';
+            });
+            document.getElementById('start-game').addEventListener('click', startGame);
+
+            document.getElementById('build-barracks').addEventListener('click', () => createBuilding('barracks'));
+            document.getElementById('build-farm').addEventListener('click', () => createBuilding('farm'));
+            document.getElementById('build-mine').addEventListener('click', () => createBuilding('mine'));
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        </script>
+    </body>
+
+    </html>
+</body>
+
+</html>
 
