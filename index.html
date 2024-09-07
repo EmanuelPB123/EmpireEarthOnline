@@ -551,35 +551,38 @@
         <!--         <h3>Configuración de Partida</h3> -->
         <p>
             <label for="initial-food">Alimento inicial:</label>
-            <input type="number" id="initial-food" value="400">
+            <input type="number" id="initial-food" value="300" min="0" max="600" class="resource-input" data-max="600">
         </p>
         <p>
             <label for="initial-wood">Madera inicial:</label>
-            <input type="number" id="initial-wood" value="200">
+            <input type="number" id="initial-wood" value="500" min="0" max="1000" class="resource-input"
+                data-max="1000">
         </p>
         <p>
             <label for="initial-stone">Piedra inicial:</label>
-            <input type="number" id="initial-stone" value="200">
+            <input type="number" id="initial-stone" value="150" min="0" max="300" class="resource-input" data-max="300">
         </p>
         <p>
             <label for="initial-gold">Oro inicial:</label>
-            <input type="number" id="initial-gold" value="200">
+            <input type="number" id="initial-gold" value="50" min="0" max="100" class="resource-input" data-max="100">
         </p>
         <p>
             <label for="food-nodes">Alimento:</label>
-            <input type="number" id="food-nodes" value="10">
+            <input type="number" id="food-nodes" value="10" min="0" max="20" class="resource-node-input" data-max="50">
         </p>
         <p>
             <label for="wood-nodes">Madera:</label>
-            <input type="number" id="wood-nodes" value="50">
+            <input type="number" id="wood-nodes" value="125" min="0" max="250" class="resource-node-input"
+                data-max="500">
         </p>
         <p>
             <label for="stone-nodes">Piedra:</label>
-            <input type="number" id="stone-nodes" value="40">
+            <input type="number" id="stone-nodes" value="15" min="0" max="30" class="resource-node-input"
+                data-max="100">
         </p>
         <p>
             <label for="gold-nodes">Oro:</label>
-            <input type="number" id="gold-nodes" value="30">
+            <input type="number" id="gold-nodes" value="10" min="0" max="20" class="resource-node-input" data-max="50">
         </p>
         <button id="start-game">Comenzar Partida</button>
     </div>
@@ -589,7 +592,7 @@
         let moveBackward = false;
         let moveLeft = false;
         let moveRight = false;
-        const moveSpeed = 3;
+        const moveSpeed = 7;
         const cameraHeight = 100; // Altura constante de la cámara
         let scene, camera, renderer, raycaster, mouse;
         let base, resourceNodes = [], units = [], buildings = [];
@@ -686,6 +689,49 @@
             updateUnitButtons();
             updateBuildingButtons();
         }
+
+        /* MAXIMO RECURSOS BASE*/
+        document.querySelectorAll('.resource-input').forEach(input => {
+            const validateInput = function () {
+                let value = parseInt(this.value);
+                if (isNaN(value)) {
+                    value = 0;
+                }
+                const max = parseInt(this.dataset.max);
+                value = Math.min(max, Math.max(0, value));
+                this.value = value;
+            };
+
+            input.addEventListener('input', validateInput);
+            input.addEventListener('change', validateInput);
+            input.addEventListener('blur', validateInput);
+            input.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter') {
+                    validateInput.call(this);
+                }
+            });
+        });
+        /* MaXIMO RECURSOS MAPA */
+        document.querySelectorAll('.resource-node-input').forEach(input => {
+            const validateInput = function () {
+                let value = parseInt(this.value);
+                if (isNaN(value)) {
+                    value = 0;
+                }
+                const max = parseInt(this.dataset.max);
+                value = Math.min(max, Math.max(0, value));
+                this.value = value;
+            };
+
+            input.addEventListener('input', validateInput);
+            input.addEventListener('change', validateInput);
+            input.addEventListener('blur', validateInput);
+            input.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter') {
+                    validateInput.call(this);
+                }
+            });
+        });
 
         function setupCamera() {
             camera.position.set(0, cameraHeight, 200);
@@ -1194,24 +1240,75 @@
             for (let i = 0; i < goldNodes; i++) createResourceNode('gold');
         }
 
-        function createResourceNode(type) {
-            const geometry = new THREE.SphereGeometry(3, 32, 32);
-            let color;
-            switch (type) {
-                case 'food': color = 0x00FF00; break;
-                case 'wood': color = 0x8B4513; break;
-                case 'stone': color = 0x808080; break;
-                case 'gold': color = 0xFFD700; break;
-            }
-            const material = new THREE.MeshStandardMaterial({ color: color });
-            const mesh = new THREE.Mesh(geometry, material);
 
-            // Distribuir los recursos en toda el área del terreno
-            const terrainSize = 10000; // Tamaño del terreno
+        const BASE_SCALE = 2; // Escala base para la comida
+
+        function createResourceNode(type) {
+            let mesh;
+            const terrainSize = 10000;
             const halfSize = terrainSize / 2;
+
+            switch (type) {
+                case 'food':
+                    // Comida: mantiene la escala base
+                    const foodGeometry = new THREE.SphereGeometry(3, 32, 32);
+                    const foodMaterial = new THREE.MeshStandardMaterial({ color: 0x00FF00, metalness: 0.7, roughness: 0.3 });
+                    mesh = new THREE.Mesh(foodGeometry, foodMaterial);
+
+                    const numSpheres = 10;
+                    for (let i = 0; i < numSpheres; i++) {
+                        const smallSphere = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.3, 16, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.7, roughness: 0.3 })
+                        );
+
+                        const phi = Math.acos(-1 + (2 * i) / numSpheres);
+                        const theta = Math.sqrt(numSpheres * Math.PI) * phi;
+
+                        smallSphere.position.setFromSpherical(new THREE.Spherical(3, phi, theta));
+                        mesh.add(smallSphere);
+                    }
+                    mesh.scale.multiplyScalar(BASE_SCALE);
+                    break;
+
+                case 'wood':
+                    // Pino: 3 veces más grande que piedra y oro (6 veces la escala base)
+                    const trunkGeometry = new THREE.CylinderGeometry(0.5, 1, 4, 8);
+                    const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+
+                    const leavesGeometry = new THREE.ConeGeometry(3, 6, 8);
+                    const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                    leaves.position.y = 5;
+
+                    mesh = new THREE.Group();
+                    mesh.add(trunk);
+                    mesh.add(leaves);
+                    mesh.scale.multiplyScalar(BASE_SCALE * 6);
+                    break;
+
+                case 'stone':
+                    // Piedra: 2 veces más grande que la comida
+                    const stoneGeometry = new THREE.DodecahedronGeometry(3, 0);
+                    const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                    mesh = new THREE.Mesh(stoneGeometry, stoneMaterial);
+                    mesh.scale.set(1, 0.7, 1);  // Aplanar un poco
+                    mesh.scale.multiplyScalar(BASE_SCALE * 2);
+                    break;
+
+                case 'gold':
+                    // Oro: 2 veces más grande que la comida
+                    const goldGeometry = new THREE.DodecahedronGeometry(3, 0);
+                    const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.7, roughness: 0.3 });
+                    mesh = new THREE.Mesh(goldGeometry, goldMaterial);
+                    mesh.scale.multiplyScalar(BASE_SCALE * 2);
+                    break;
+            }
+
             mesh.position.set(
                 Math.random() * terrainSize - halfSize,
-                3,
+                mesh.scale.y * 1.5, // Ajustar la altura según la escala
                 Math.random() * terrainSize - halfSize
             );
 
