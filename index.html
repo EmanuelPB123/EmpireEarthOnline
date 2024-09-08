@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Empire Earth Onliner</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="/empire.png" />
     <style>
         body,
         html {
@@ -502,6 +502,65 @@
         #side-nav.era-espacial .nav-button-container {
             display: block;
         }
+
+        /* NAV DERECHO */
+
+        #worker-control-nav {
+            position: fixed;
+            top: 40px;
+            /* Ajusta esto según la altura de tu top-nav */
+            right: 0;
+            width: 200px;
+            /* Ajusta el ancho según tus necesidades */
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            padding: 10px;
+            z-index: 1000;
+            border-left: 1px solid #444;
+            bottom: 136px;
+            /* Ajusta esto según la altura de tu middle-nav y bottom-nav */
+            overflow-y: auto;
+        }
+
+        #worker-controls {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #worker-controls h3 {
+            margin-top: 0;
+            font-size: 16px;
+        }
+
+        .slider-container {
+            margin-bottom: 10px;
+        }
+
+        #worker-task-slider {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .resource-checkboxes {
+            font-size: 14px;
+        }
+
+        .resource-checkboxes h4 {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .resource-checkboxes label {
+            display: block;
+            margin-bottom: 5px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -521,14 +580,34 @@
         </div>
     </nav>
 
-
     <nav id="side-nav" class="edad-prehistorica">
         <div class="button-grid">
             <!-- Los botones de unidades se generarán aquí dinámicamente -->
         </div>
     </nav>
 
+<nav id="worker-control-nav">
+        <div id="worker-controls">
+            <h3>Control de Trabajadores</h3>
+            <div class="slider-container">
+                <input type="range" id="worker-task-slider" min="0" max="2" value="1" step="1">
+                <div class="slider-labels">
+                    <span>Nada</span>
+                    <span>Recolectar</span>
+                    <span>Defender</span>
+                </div>
+            </div>
+            <div class="resource-checkboxes">
+                <h4>Recursos a extraer:</h4>
+                <label><input type="checkbox" id="extract-food" checked> Comida</label>
+                <label><input type="checkbox" id="extract-wood" checked> Madera</label>
+                <label><input type="checkbox" id="extract-stone" checked> Piedra</label>
+                <label><input type="checkbox" id="extract-gold" checked> Oro</label>
+            </div>
+        </div>
+    </nav>
 
+    
     <nav id="middle-nav">
         <button id="advance-era" class="era-button">
             <i class="fas fa-chevron-up"></i>
@@ -688,6 +767,19 @@
 
             updateUnitButtons();
             updateBuildingButtons();
+
+            // Crear un elemento para mostrar la información al pasar el mouse
+            hoverInfo = document.createElement('div');
+            hoverInfo.style.position = 'absolute';
+            hoverInfo.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            hoverInfo.style.color = 'white';
+            hoverInfo.style.padding = '5px';
+            hoverInfo.style.borderRadius = '5px';
+            hoverInfo.style.display = 'none';
+            document.body.appendChild(hoverInfo);
+
+            // Añadir event listener para el movimiento del mouse
+            renderer.domElement.addEventListener('mousemove', onMouseMove, false);
         }
 
         /* MAXIMO RECURSOS BASE*/
@@ -817,7 +909,7 @@
             directionalLight.position.set(0, 1, 0);
             scene.add(directionalLight);
         }
-
+        /* UNIDADES */
         function updateUnitButtons() {
             console.log('Actualizando botones de unidades. Era actual:', currentEra);
             const buttonGrid = document.querySelector('#side-nav .button-grid');
@@ -892,7 +984,7 @@
 
             addUnitEventListeners();
         }
-
+        /* EDIFICIOS */
         function updateBuildingButtons() {
             const buttonGrid = document.querySelector('#bottom-nav .button-grid');
             buttonGrid.innerHTML = ''; // Limpiar botones existentes
@@ -952,7 +1044,7 @@
                 }
             });
         }
-
+        /* AVANZAR ERA */
         function advanceEra() {
             if (currentEra < eras.length - 1 &&
                 resources.food >= 100 && resources.wood >= 50 && resources.stone >= 50 && resources.gold >= 50) {
@@ -1002,7 +1094,7 @@
             updateUnitButtons();
             updateBuildingButtons();
         }
-
+        /* BASE */
         class Base {
             constructor() {
                 this.level = 1;
@@ -1011,10 +1103,717 @@
             }
 
             createMesh() {
-                const geometry = new THREE.BoxGeometry(10, 20, 10);
-                const material = new THREE.MeshStandardMaterial({ color: eras[currentEra].color });
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.position.set(0, 10, 0);
+                let geometry, material;
+                switch (currentEra) {
+                    case 0: // Edad Prehistórica
+                        geometry = new THREE.Group();
+
+                        // Piedras alrededor
+                        for (let i = 0; i < 12; i++) {
+                            const stoneGeometry = new THREE.DodecahedronGeometry(1.5, 1);
+                            const stone = new THREE.Mesh(stoneGeometry, new THREE.MeshPhongMaterial({
+                                color: 0x808080,
+                                shininess: 10,
+                                specular: 0x111111
+                            }));
+                            stone.position.set(
+                                5 * Math.cos(i * Math.PI / 6),
+                                Math.random() * 0.5,
+                                5 * Math.sin(i * Math.PI / 6)
+                            );
+                            stone.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                            stone.scale.set(1 + Math.random() * 0.5, 0.7 + Math.random() * 0.3, 1 + Math.random() * 0.5);
+                            geometry.add(stone);
+                        }
+
+                        // Troncos
+                        for (let i = 0; i < 7; i++) {
+                            const trunkGeometry = new THREE.CylinderGeometry(0.4, 0.5, 6, 8);
+                            const trunk = new THREE.Mesh(trunkGeometry, new THREE.MeshLambertMaterial({
+                                color: 0x8B4513
+                            }));
+                            trunk.position.set(
+                                3 * Math.cos(i * Math.PI / 3.5),
+                                3,
+                                3 * Math.sin(i * Math.PI / 3.5)
+                            );
+                            trunk.rotation.x = Math.PI / 4 + Math.random() * 0.2;
+                            trunk.rotation.z = i * Math.PI / 3.5 + Math.random() * 0.2;
+                            geometry.add(trunk);
+                        }
+
+                        // Función para crear una hoguera
+                        function createBonfire(x, z, scale = 1) {
+                            const bonfire = new THREE.Group();
+
+                            // Llamas
+                            for (let i = 0; i < 5; i++) {
+                                const singleFlameGeometry = new THREE.ConeGeometry(1 + Math.random(), 4 + Math.random() * 2, 8);
+                                const flame = new THREE.Mesh(singleFlameGeometry, new THREE.MeshBasicMaterial({
+                                    color: new THREE.Color(0xFF6600).offsetHSL(0, 0, Math.random() * 0.2),
+                                    transparent: true,
+                                    opacity: 0.7
+                                }));
+                                flame.position.set(
+                                    Math.random() * 2 - 1,
+                                    3 + Math.random() * 2,
+                                    Math.random() * 2 - 1
+                                );
+                                flame.rotation.y = Math.random() * Math.PI * 2;
+                                bonfire.add(flame);
+                            }
+
+                            // Luz parpadeante
+                            const fireLight = new THREE.PointLight(0xFF6600, 1, 20);
+                            fireLight.position.set(0, 6, 0);
+                            bonfire.add(fireLight);
+
+                            bonfire.position.set(x, 0, z);
+                            bonfire.scale.set(scale, scale, scale);
+                            return bonfire;
+                        }
+
+                        // Hoguera principal
+                        const mainBonfire = createBonfire(0, 0, 1.2);
+                        geometry.add(mainBonfire);
+
+                        // Hogueras adicionales
+                        const additionalBonfires = [
+                            { x: 12, z: 12, scale: 0.8 },
+                            { x: -12, z: 12, scale: 0.7 },
+                            { x: 12, z: -12, scale: 0.9 },
+                            { x: -12, z: -12, scale: 0.75 }
+                        ];
+
+                        additionalBonfires.forEach(bonfire => {
+                            geometry.add(createBonfire(bonfire.x, bonfire.z, bonfire.scale));
+                        });
+
+                        // Animación de las llamas y luces
+                        function animateFire() {
+                            requestAnimationFrame(animateFire);
+                            geometry.children.forEach(child => {
+                                if (child instanceof THREE.Group) {
+                                    child.children.forEach(element => {
+                                        if (element instanceof THREE.Mesh && element.geometry instanceof THREE.ConeGeometry) {
+                                            element.scale.y = 1 + Math.sin(Date.now() * 0.01 + Math.random()) * 0.1;
+                                            element.rotation.y += 0.03;
+                                            element.material.opacity = 0.5 + Math.random() * 0.5;
+                                        } else if (element instanceof THREE.PointLight) {
+                                            element.intensity = 1 + Math.random() * 0.3;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        animateFire();
+
+                        // Ajustar la posición del grupo completo para que esté en el suelo
+                        geometry.position.y = 0;
+
+                        break;
+
+                    case 1: // Edad de Piedra
+                        geometry = new THREE.Group();
+
+                        // Choza principal
+                        const hutGeometry = new THREE.ConeGeometry(4, 6, 8);
+                        const hutMaterial = new THREE.MeshStandardMaterial({ color: 0xD2B48C }); // Color paja
+                        const hut = new THREE.Mesh(hutGeometry, hutMaterial);
+                        hut.position.y = 3;
+                        geometry.add(hut);
+
+                        // Base de madera
+                        const baseGeometry = new THREE.CylinderGeometry(5, 5, 1, 8);
+                        const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Color madera
+                        const baseStructure = new THREE.Mesh(baseGeometry, baseMaterial);
+                        baseStructure.position.y = 1;
+                        geometry.add(baseStructure);
+
+                        // Piedras alrededor
+                        for (let i = 0; i < 8; i++) {
+                            const stoneGeometry = new THREE.DodecahedronGeometry(0.8, 1);
+                            const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 }); // Color piedra
+                            const stone = new THREE.Mesh(stoneGeometry, stoneMaterial);
+                            const angle = (i / 8) * Math.PI * 2;
+                            stone.position.set(
+                                Math.cos(angle) * 5,
+                                -0.5,
+                                Math.sin(angle) * 5
+                            );
+                            stone.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                            stone.scale.set(1 + Math.random() * 0.5, 0.7 + Math.random() * 0.3, 1 + Math.random() * 0.5);
+                            geometry.add(stone);
+                        }
+
+                        // Chozas más pequeñas
+                        for (let i = 0; i < 3; i++) {
+                            const smallHutGeometry = new THREE.ConeGeometry(2, 3, 8);
+                            const smallHut = new THREE.Mesh(smallHutGeometry, hutMaterial);
+                            const angle = (i / 3) * Math.PI * 2;
+                            smallHut.position.set(
+                                Math.cos(angle) * 7,
+                                1.5,
+                                Math.sin(angle) * 7
+                            );
+                            geometry.add(smallHut);
+                        }
+
+                        break;
+
+                    case 2: // Edad de Cobre
+                        geometry = new THREE.Group();
+
+                        // Cabaña principal
+                        const mainHutGeometry = new THREE.CylinderGeometry(3, 4, 5, 8);
+                        const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xD2B48C }); // Color arcilla
+                        const mainHut = new THREE.Mesh(mainHutGeometry, wallMaterial);
+                        mainHut.position.y = 2.5;
+                        geometry.add(mainHut);
+
+                        // Techo de madera
+                        const roofGeometry = new THREE.ConeGeometry(5, 3, 8);
+                        const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Color madera
+                        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+                        roof.position.y = 6.5;
+                        geometry.add(roof);
+
+                        // Cabañas más pequeñas
+                        for (let i = 0; i < 3; i++) {
+                            const smallHut = new THREE.Group();
+
+                            const smallHutBody = new THREE.Mesh(
+                                new THREE.CylinderGeometry(1.5, 2, 3, 8),
+                                wallMaterial
+                            );
+                            smallHut.add(smallHutBody);
+
+                            const smallRoof = new THREE.Mesh(
+                                new THREE.ConeGeometry(2.5, 2, 8),
+                                roofMaterial
+                            );
+                            smallRoof.position.y = 2.5;
+                            smallHut.add(smallRoof);
+
+                            smallHut.position.set(
+                                Math.cos(i * Math.PI * 2 / 3) * 6,
+                                1.5,
+                                Math.sin(i * Math.PI * 2 / 3) * 6
+                            );
+                            geometry.add(smallHut);
+                        }
+
+                        // Herramientas de cobre
+                        for (let i = 0; i < 5; i++) {
+                            const toolGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
+                            const copperMaterial = new THREE.MeshStandardMaterial({ color: 0xB87333 }); // Color cobre
+                            const tool = new THREE.Mesh(toolGeometry, copperMaterial);
+                            tool.position.set(
+                                Math.random() * 8 - 4,
+                                0.5,
+                                Math.random() * 8 - 4
+                            );
+                            tool.rotation.z = Math.PI / 4;
+                            geometry.add(tool);
+                        }
+
+                        break;
+
+                    case 3: // Edad de Bronce
+                        geometry = new THREE.Group();
+
+                        // Casa principal de piedra
+                        const mainHouseGeometry = new THREE.BoxGeometry(8, 6, 8);
+                        const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 }); // Color piedra
+                        const mainHouse = new THREE.Mesh(mainHouseGeometry, stoneMaterial);
+                        mainHouse.position.y = 3;
+                        geometry.add(mainHouse);
+
+                        // Techo de bronce para la casa principal
+                        const mainRoofGeometry = new THREE.ConeGeometry(6, 4, 4);
+                        const bronzeMaterial = new THREE.MeshStandardMaterial({ color: 0xCD7F32 }); // Color bronce
+                        const mainRoof = new THREE.Mesh(mainRoofGeometry, bronzeMaterial);
+                        mainRoof.position.y = 8;
+                        geometry.add(mainRoof);
+
+                        // Casas más pequeñas
+                        for (let i = 0; i < 3; i++) {
+                            const smallHouse = new THREE.Group();
+
+                            const houseGeometry = new THREE.BoxGeometry(4, 3, 4);
+                            const house = new THREE.Mesh(houseGeometry, stoneMaterial);
+                            house.position.y = 1.5;
+                            smallHouse.add(house);
+
+                            const roofGeometry = new THREE.ConeGeometry(3, 2, 4);
+                            const roof = new THREE.Mesh(roofGeometry, bronzeMaterial);
+                            roof.position.y = 4;
+                            smallHouse.add(roof);
+
+                            smallHouse.position.set(
+                                Math.cos(i * Math.PI * 2 / 3) * 8,
+                                0,
+                                Math.sin(i * Math.PI * 2 / 3) * 8
+                            );
+                            geometry.add(smallHouse);
+                        }
+
+                        // Forja pequeña
+                        const forgeGeometry = new THREE.BoxGeometry(3, 2, 3);
+                        const forgeMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Color marrón oscuro
+                        const forge = new THREE.Mesh(forgeGeometry, forgeMaterial);
+                        forge.position.set(-5, 1, -5);
+                        geometry.add(forge);
+
+                        // Chimenea de la forja
+                        const chimneyGeometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 8);
+                        const forgeChimney = new THREE.Mesh(chimneyGeometry, stoneMaterial);
+                        forgeChimney.position.set(-5, 3.5, -5);
+                        geometry.add(forgeChimney);
+
+                        // Armas de bronce
+                        for (let i = 0; i < 5; i++) {
+                            const weaponGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
+                            const weapon = new THREE.Mesh(weaponGeometry, bronzeMaterial);
+                            weapon.position.set(
+                                Math.random() * 10 - 5,
+                                0.5,
+                                Math.random() * 10 - 5
+                            );
+                            weapon.rotation.z = Math.PI / 4;
+                            geometry.add(weapon);
+                        }
+
+                        break;
+
+                    case 4: // Edad Oscura
+                        geometry = new THREE.Group();
+
+                        // Muralla de madera
+                        const darkAgeWallMaterial = new THREE.MeshStandardMaterial({ color: 0x4B3621 }); // Marrón oscuro para madera
+                        for (let i = 0; i < 4; i++) {
+                            const wallSegment = new THREE.Mesh(
+                                new THREE.BoxGeometry(20, 5, 1),
+                                darkAgeWallMaterial
+                            );
+                            wallSegment.position.set(
+                                i % 2 === 0 ? 0 : (i === 1 ? 10 : -10),
+                                2.5,
+                                i < 2 ? 10 : -10
+                            );
+                            wallSegment.rotation.y = i % 2 === 0 ? 0 : Math.PI / 2;
+                            geometry.add(wallSegment);
+                        }
+
+                        // Torres de vigilancia
+                        const darkAgeTowerMaterial = new THREE.MeshStandardMaterial({ color: 0x5C4033 }); // Marrón más claro para las torres
+                        for (let i = 0; i < 4; i++) {
+                            const tower = new THREE.Mesh(
+                                new THREE.CylinderGeometry(1.5, 1.5, 8, 8),
+                                darkAgeTowerMaterial
+                            );
+                            tower.position.set(
+                                i % 2 === 0 ? 10 : -10,
+                                4,
+                                i < 2 ? 10 : -10
+                            );
+                            geometry.add(tower);
+                        }
+
+                        // Edificios pequeños de piedra oscura
+                        const darkAgeBuildingMaterial = new THREE.MeshStandardMaterial({ color: 0x2F4F4F }); // Gris pizarra oscuro
+                        for (let i = 0; i < 3; i++) {
+                            const building = new THREE.Mesh(
+                                new THREE.BoxGeometry(4, 3, 4),
+                                darkAgeBuildingMaterial
+                            );
+                            building.position.set(
+                                (i - 1) * 5,
+                                1.5,
+                                0
+                            );
+                            geometry.add(building);
+                        }
+                        break;
+
+                    case 5: // Edad Media
+                        geometry = new THREE.Group();
+
+                        // Torreón (keep)
+                        const medievalKeepMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Marrón más cálido para piedra
+                        const keep = new THREE.Mesh(
+                            new THREE.BoxGeometry(10, 20, 10),
+                            medievalKeepMaterial
+                        );
+                        keep.position.set(0, 10, 0);
+                        geometry.add(keep);
+
+                        // Torres
+                        const medievalTowerMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 }); // Gris más oscuro para las torres
+                        const towerGeometry = new THREE.CylinderGeometry(3, 3, 25, 8);
+                        const tower1 = new THREE.Mesh(towerGeometry, medievalTowerMaterial);
+                        const tower2 = new THREE.Mesh(towerGeometry, medievalTowerMaterial);
+                        tower1.position.set(-10, 12.5, -10);
+                        tower2.position.set(10, 12.5, 10);
+                        geometry.add(tower1, tower2);
+
+                        // Añadir almenas a las torres
+                        const medievalBattlementMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                        const createBattlements = (tower) => {
+                            const battlementGeometry = new THREE.BoxGeometry(1, 2, 1);
+                            for (let i = 0; i < 8; i++) {
+                                const battlement = new THREE.Mesh(battlementGeometry, medievalBattlementMaterial);
+                                battlement.position.set(
+                                    2.5 * Math.cos(i * Math.PI / 4),
+                                    13,
+                                    2.5 * Math.sin(i * Math.PI / 4)
+                                );
+                                tower.add(battlement);
+                            }
+                        };
+                        createBattlements(tower1);
+                        createBattlements(tower2);
+
+                        // Añadir muralla entre las torres
+                        const medievalWallMaterial = new THREE.MeshStandardMaterial({ color: 0x9B7653 }); // Marrón más claro para las murallas
+                        const wallGeometry = new THREE.BoxGeometry(24, 15, 2);
+                        const wall1 = new THREE.Mesh(wallGeometry, medievalWallMaterial);
+                        wall1.position.set(0, 7.5, 7);
+                        const wall2 = wall1.clone();
+                        wall2.position.set(7, 7.5, 0);
+                        wall2.rotation.y = Math.PI / 2;
+                        geometry.add(wall1, wall2);
+
+                        // Añadir puerta
+                        const medievalDoorMaterial = new THREE.MeshStandardMaterial({ color: 0x4E3B31 }); // Marrón oscuro para la puerta
+                        const door = new THREE.Mesh(
+                            new THREE.BoxGeometry(4, 6, 0.5),
+                            medievalDoorMaterial
+                        );
+                        door.position.set(0, 3, 8);
+                        geometry.add(door);
+
+                        // Añadir bandera
+                        const medievalFlagpoleMaterial = new THREE.MeshStandardMaterial({ color: 0xD3D3D3 });
+                        const flagpole = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.1, 0.1, 5, 8),
+                            medievalFlagpoleMaterial
+                        );
+                        flagpole.position.set(0, 22.5, 0);
+                        const medievalFlagMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide });
+                        const flag = new THREE.Mesh(
+                            new THREE.PlaneGeometry(2, 1),
+                            medievalFlagMaterial
+                        );
+                        flag.position.set(1, 3, 0);
+                        flag.rotation.y = Math.PI / 2;
+                        flagpole.add(flag);
+                        geometry.add(flagpole);
+
+                        break;
+                    case 6: // Renacimiento
+                    case 7: // Edad Imperial
+                        geometry = new THREE.Group();
+
+                        // Edificio principal
+                        const mainBuildingGeometry = new THREE.BoxGeometry(20, 30, 20);
+                        geometry.add(new THREE.Mesh(
+                            mainBuildingGeometry,
+                            new THREE.MeshStandardMaterial({ color: 0xDEB887 })
+                        ));
+
+                        // Cúpula
+                        const domeGeometry = new THREE.SphereGeometry(12, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+                        const domeMesh = new THREE.Mesh(
+                            domeGeometry,
+                            new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.5, roughness: 0.3 })
+                        );
+                        domeMesh.position.y = 15;
+                        geometry.add(domeMesh);
+
+                        // Columnas
+                        const columnGeometry = new THREE.CylinderGeometry(1, 1, 25, 16);
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2;
+                            const columnMesh = new THREE.Mesh(
+                                columnGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0xF5F5DC })
+                            );
+                            columnMesh.position.set(
+                                Math.cos(angle) * 12,
+                                12.5,
+                                Math.sin(angle) * 12
+                            );
+                            geometry.add(columnMesh);
+                        }
+
+                        // Escaleras
+                        const stairsGeometry = new THREE.BoxGeometry(30, 2, 10);
+                        const stairsMesh = new THREE.Mesh(
+                            stairsGeometry,
+                            new THREE.MeshStandardMaterial({ color: 0xD3D3D3 })
+                        );
+                        stairsMesh.position.set(0, -14, 15);
+                        geometry.add(stairsMesh);
+
+                        // Estatuas
+                        const statueGeometry = new THREE.CylinderGeometry(1, 1, 6, 8);
+                        for (let i = 0; i < 2; i++) {
+                            const statueMesh = new THREE.Mesh(
+                                statueGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0xC0C0C0 })
+                            );
+                            statueMesh.position.set(i === 0 ? -10 : 10, -11, 12);
+                            geometry.add(statueMesh);
+                        }
+
+                        // Banderas
+                        const flagpoleGeometry = new THREE.CylinderGeometry(0.2, 0.2, 8, 8);
+                        const flagGeometry = new THREE.PlaneGeometry(3, 2);
+                        for (let i = 0; i < 2; i++) {
+                            const flagpoleMesh = new THREE.Mesh(
+                                flagpoleGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                            );
+                            flagpoleMesh.position.set(i === 0 ? -15 : 15, -8, -8);
+
+                            const flagMesh = new THREE.Mesh(
+                                flagGeometry,
+                                new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide })
+                            );
+                            flagMesh.position.set(1.5, 3, 0);
+                            flagMesh.rotation.y = Math.PI / 2;
+
+                            flagpoleMesh.add(flagMesh);
+                            geometry.add(flagpoleMesh);
+                        }
+
+                        break;
+                    case 8: // Edad Industrial
+                    case 9: // Edad Atómica (IGM)
+                    case 10: // Edad Atómica (IIGM)
+                        geometry = new THREE.Group();
+
+                        // Edificio principal (búnker)
+                        geometry.add(new THREE.Mesh(
+                            new THREE.BoxGeometry(30, 15, 30),
+                            new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.7 })
+                        ));
+
+                        // Cúpula de reactor
+                        const reactorDome = new THREE.Mesh(
+                            new THREE.SphereGeometry(8, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+                            new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.5, roughness: 0.5 })
+                        );
+                        reactorDome.position.set(0, 15, 0);
+                        geometry.add(reactorDome);
+
+                        // Torres de enfriamiento
+                        for (let i = 0; i < 2; i++) {
+                            const coolingTower = new THREE.Mesh(
+                                new THREE.CylinderGeometry(5, 7, 20, 16, 1, true),
+                                new THREE.MeshStandardMaterial({ color: 0xD3D3D3, side: THREE.DoubleSide })
+                            );
+                            coolingTower.position.set(i === 0 ? -15 : 15, 10, 0);
+                            geometry.add(coolingTower);
+                        }
+
+                        // Antenas
+                        for (let i = 0; i < 3; i++) {
+                            const antenna = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.2, 0.2, 10, 8),
+                                new THREE.MeshStandardMaterial({ color: 0x696969 })
+                            );
+                            antenna.position.set((i - 1) * 10, 20, 10);
+                            geometry.add(antenna);
+                        }
+
+                        // Valla de seguridad
+                        const fenceGeometry = new THREE.BoxGeometry(60, 3, 0.5);
+                        for (let i = 0; i < 4; i++) {
+                            const fence = new THREE.Mesh(
+                                fenceGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                            );
+                            fence.position.set(
+                                i % 2 === 0 ? 0 : (i === 1 ? 30 : -30),
+                                1.5,
+                                i < 2 ? 30 : -30
+                            );
+                            fence.rotation.y = i % 2 === 0 ? 0 : Math.PI / 2;
+                            geometry.add(fence);
+                        }
+
+                        // Símbolo de radiación
+                        const radiationSymbol = new THREE.Group();
+                        const symbolMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+
+                        // Centro del símbolo
+                        radiationSymbol.add(new THREE.Mesh(
+                            new THREE.CircleGeometry(1, 32),
+                            symbolMaterial
+                        ));
+
+                        // Aspas del símbolo
+                        for (let i = 0; i < 3; i++) {
+                            const blade = new THREE.Mesh(
+                                new THREE.CircleGeometry(3, 32, Math.PI / 3, Math.PI / 3),
+                                symbolMaterial
+                            );
+                            blade.rotation.z = (i * Math.PI * 2) / 3;
+                            radiationSymbol.add(blade);
+                        }
+
+                        radiationSymbol.position.set(0, 7.6, 15.1);
+                        radiationSymbol.rotation.x = -Math.PI / 2;
+                        geometry.add(radiationSymbol);
+
+                        break;
+                    case 11: // Edad Atómica (Moderna)
+                    case 12: // Edad Digital
+                    case 13: // Nano Edad
+                        geometry = new THREE.Group();
+
+                        // Edificio principal futurista
+                        geometry.add(new THREE.Mesh(
+                            new THREE.CylinderGeometry(10, 15, 40, 8),
+                            new THREE.MeshStandardMaterial({ color: 0x4682B4, metalness: 0.7, roughness: 0.2 })
+                        ));
+
+                        // Cúpula de cristal
+                        geometry.add(new THREE.Mesh(
+                            new THREE.SphereGeometry(12, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2),
+                            new THREE.MeshPhysicalMaterial({
+                                color: 0xADD8E6,
+                                transparent: true,
+                                opacity: 0.6,
+                                metalness: 0.9,
+                                roughness: 0.1
+                            })
+                        )).position.y = 20;
+
+                        // Anillos orbitales
+                        for (let i = 0; i < 3; i++) {
+                            const ring = new THREE.Mesh(
+                                new THREE.TorusGeometry(15 + i * 3, 0.5, 16, 100),
+                                new THREE.MeshStandardMaterial({ color: 0x00FFFF, emissive: 0x00FFFF, emissiveIntensity: 0.5 })
+                            );
+                            ring.rotation.x = Math.PI / 2;
+                            ring.position.y = 10 + i * 5;
+                            geometry.add(ring);
+                        }
+
+                        // Plataformas flotantes
+                        for (let i = 0; i < 4; i++) {
+                            const platform = new THREE.Mesh(
+                                new THREE.CylinderGeometry(3, 3, 1, 6),
+                                new THREE.MeshStandardMaterial({ color: 0xA9A9A9, metalness: 0.5, roughness: 0.5 })
+                            );
+                            const angle = (i / 4) * Math.PI * 2;
+                            platform.position.set(
+                                Math.cos(angle) * 20,
+                                Math.sin(angle) * 5 + 15,
+                                Math.sin(angle) * 20
+                            );
+                            geometry.add(platform);
+                        }
+
+                        // Hologramas
+                        const hologramGeometry1 = new THREE.ConeGeometry(2, 4, 32, 1, true);
+                        const hologramMaterial1 = new THREE.MeshBasicMaterial({
+                            color: 0x00FFFF,
+                            transparent: true,
+                            opacity: 0.5
+                        });
+
+                        for (let i = 0; i < 3; i++) {
+                            geometry.add(new THREE.Mesh(hologramGeometry1, hologramMaterial1))
+                                .position.set((i - 1) * 10, 5, 15);
+                        }
+
+                        break;
+                    case 14: // Era Espacial
+                        geometry = new THREE.Group();
+
+                        // Base principal
+                        geometry.add(new THREE.Mesh(
+                            new THREE.CylinderGeometry(15, 20, 30, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.8, roughness: 0.2 })
+                        ));
+
+                        // Cúpula geodésica
+                        geometry.add(new THREE.Mesh(
+                            new THREE.IcosahedronGeometry(18, 2),
+                            new THREE.MeshPhysicalMaterial({
+                                color: 0x00FFFF,
+                                transparent: true,
+                                opacity: 0.6,
+                                metalness: 0.9,
+                                roughness: 0.1
+                            })
+                        )).position.y = 25;
+
+                        // Plataforma de lanzamiento
+                        geometry.add(new THREE.Mesh(
+                            new THREE.CylinderGeometry(10, 10, 2, 32),
+                            new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 })
+                        )).position.set(25, 1, 0);
+
+                        // Cohete
+                        const rocketBody = new THREE.Mesh(
+                            new THREE.CylinderGeometry(2, 3, 20, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xFFFFFF, metalness: 0.5, roughness: 0.5 })
+                        );
+                        rocketBody.position.set(25, 12, 0);
+                        geometry.add(rocketBody);
+
+                        geometry.add(new THREE.Mesh(
+                            new THREE.ConeGeometry(2, 5, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.5, roughness: 0.5 })
+                        )).position.set(25, 24.5, 0);
+
+                        // Antenas parabólicas
+                        for (let i = 0; i < 3; i++) {
+                            const dish = new THREE.Mesh(
+                                new THREE.SphereGeometry(3, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.5),
+                                new THREE.MeshStandardMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+                            );
+                            const angle = (i / 3) * Math.PI * 2;
+                            dish.position.set(
+                                Math.cos(angle) * 20,
+                                5,
+                                Math.sin(angle) * 20
+                            );
+                            dish.rotation.x = -Math.PI / 2;
+                            dish.rotation.y = -angle;
+                            geometry.add(dish);
+                        }
+
+                        // Paneles solares
+                        for (let i = 0; i < 2; i++) {
+                            geometry.add(new THREE.Mesh(
+                                new THREE.BoxGeometry(10, 0.1, 5),
+                                new THREE.MeshStandardMaterial({
+                                    color: 0x1E90FF,
+                                    metalness: 0.8,
+                                    roughness: 0.2
+                                })
+                            )).position.set(i === 0 ? -15 : 15, 10, 10);
+                        }
+
+                        break;
+                    default:
+                        geometry = new THREE.BoxGeometry(10, 20, 10);
+                        material = new THREE.MeshStandardMaterial({ color: eras[currentEra].color });
+                }
+
+                let mesh;
+                if (geometry instanceof THREE.Group) {
+                    mesh = geometry;
+                } else {
+                    mesh = new THREE.Mesh(geometry, material);
+                }
+                mesh.position.set(0, 0, 0);
                 return mesh;
             }
 
@@ -1026,11 +1825,17 @@
                 scene.add(this.mesh);
             }
         }
-
+        /* UNIDADES FORMA;COLOR */
         class Unit {
             constructor(type) {
                 this.type = type;
                 this.mesh = this.createMesh();
+                this.target = null;
+                this.carrying = null;
+                this.carryingAmount = 0;
+                this.maxCarry = 10;
+                this.speed = 0.5;
+                this.nearestNodes = [];
                 scene.add(this.mesh);
             }
 
@@ -1055,8 +1860,133 @@
                 this.mesh = this.createMesh();
                 scene.add(this.mesh);
             }
+
+            update() {
+                if (this.type === 'worker') {
+                    const sliderValue = document.getElementById('worker-task-slider').value;
+
+                    if (sliderValue === '1') { // Recolectar
+                        if (!this.carrying) {
+                            // Si no está cargando recursos, busca un nodo de recursos
+                            if (!this.target || !this.isValidTarget(this.target) || !this.isTargetResourceEnabled(this.target)) {
+                                this.findNearestResources();
+                                if (this.nearestNodes.length > 0) {
+                                    this.target = this.nearestNodes[0].mesh.position.clone();
+                                }
+                            }
+                        } else {
+                            // Si está cargando recursos, establece la base como objetivo
+                            this.target = base.mesh.position.clone();
+                        }
+
+                        if (this.target) {
+                            const direction = new THREE.Vector3().subVectors(this.target, this.mesh.position).normalize();
+                            this.mesh.position.add(direction.multiplyScalar(this.speed));
+
+                            if (this.mesh.position.distanceTo(this.target) < 1) {
+                                if (!this.carrying) {
+                                    // Llegó al nodo de recursos, comienza a recolectar
+                                    const closestNode = this.findNodeAtPosition(this.target);
+                                    if (closestNode && closestNode.resources > 0 && this.isResourceEnabled(closestNode.type)) {
+                                        this.carrying = closestNode.type;
+                                        this.carryingAmount = Math.min(this.maxCarry, closestNode.resources);
+                                        closestNode.resources -= this.carryingAmount;
+                                        if (closestNode.resources <= 0) {
+                                            this.findNearestResources();
+                                        }
+                                    } else {
+                                        this.findNearestResources();
+                                    }
+                                } else {
+                                    // Llegó a la base, deposita los recursos
+                                    resources[this.carrying] += this.carryingAmount;
+                                    this.carrying = null;
+                                    this.carryingAmount = 0;
+                                    updateResourceDisplay();
+                                    this.findNearestResources(); // Busca nuevos recursos inmediatamente
+                                }
+                                this.target = null;
+                            }
+                        }
+                    } else if (sliderValue === '2') { // Defender
+                        // ... (código de defensa sin cambios)
+                    } else { // Nada (valor 0)
+                        // No hacer nada, quedarse quieto
+                    }
+                }
+            }
+
+            isTargetResourceEnabled(target) {
+                const closestNode = this.findNodeAtPosition(target);
+                return closestNode && this.isResourceEnabled(closestNode.type);
+            }
+
+            isResourceEnabled(resourceType) {
+                const checkboxId = `extract-${resourceType}`;
+                return document.getElementById(checkboxId).checked;
+            }
+
+            findNearestResources() {
+                this.nearestNodes = resourceNodes
+                    .filter(node => node && node.mesh && node.resources > 0 && this.isResourceEnabled(node.type))
+                    .sort((a, b) =>
+                        this.mesh.position.distanceToSquared(a.mesh.position) -
+                        this.mesh.position.distanceToSquared(b.mesh.position)
+                    )
+                    .slice(0, 10);
+
+                if (this.nearestNodes.length === 0) {
+                    this.target = base.mesh.position.clone();
+                }
+            }
+            isValidTarget(target) {
+                return target && target.isVector3 && !isNaN(target.x) && !isNaN(target.y) && !isNaN(target.z);
+            }
+
+            findNodeAtPosition(position) {
+                return this.nearestNodes.find(node =>
+                    node && node.mesh && node.mesh.position &&
+                    node.mesh.position.distanceTo(position) < 0.1
+                );
+            }
+
+            findNearestResources() {
+                const extractFood = document.getElementById('extract-food').checked;
+                const extractWood = document.getElementById('extract-wood').checked;
+                const extractStone = document.getElementById('extract-stone').checked;
+                const extractGold = document.getElementById('extract-gold').checked;
+
+                this.nearestNodes = resourceNodes
+                    .filter(node => node && node.mesh && node.resources > 0 &&
+                        ((node.type === 'food' && extractFood) ||
+                            (node.type === 'wood' && extractWood) ||
+                            (node.type === 'stone' && extractStone) ||
+                            (node.type === 'gold' && extractGold)))
+                    .sort((a, b) =>
+                        this.mesh.position.distanceToSquared(a.mesh.position) -
+                        this.mesh.position.distanceToSquared(b.mesh.position)
+                    )
+                    .slice(0, 10);
+
+                if (this.nearestNodes.length === 0) {
+                    this.target = base.mesh.position.clone();
+                }
+            }
+
+        }
+        // Añade esta función para actualizar el comportamiento de los trabajadores
+        function updateWorkerBehavior() {
+            units.forEach(unit => {
+                if (unit.type === 'worker') {
+                    unit.findNearestResources();
+                    if (!unit.carrying) {
+                        unit.target = null; // Esto forzará a la unidad a buscar un nuevo objetivo en la próxima actualización
+                    }
+                }
+            });
         }
 
+        /* EDIFICIOS FORMA;COLOR */
         class Building {
             constructor(type, position) {
                 this.type = type;
@@ -1138,7 +2068,7 @@
                 return mesh;
             }
         }
-
+        /* COSTO UNIDADES */
         function createUnit(type) {
             let cost;
             switch (type) {
@@ -1159,7 +2089,7 @@
                 updatePopulation();
             }
         }
-
+        /* COSTO EDIFICIOS */
         function createBuilding(type) {
             let cost;
             switch (type) {
@@ -1240,7 +2170,7 @@
             for (let i = 0; i < goldNodes; i++) createResourceNode('gold');
         }
 
-
+        /* FORMA COLOR RECURSOS */
         const BASE_SCALE = 2; // Escala base para la comida
 
         function createResourceNode(type) {
@@ -1313,7 +2243,7 @@
             );
 
             scene.add(mesh);
-            resourceNodes.push({ type: type, mesh: mesh });
+            resourceNodes.push({ type: type, mesh: mesh, resources: 100 });
         }
 
         function updatePopulation() {
@@ -1322,9 +2252,71 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            updateCamera(); // Añade esta línea
+            units.forEach(unit => unit.update());
+            updateResourceNodes();
+            updateCamera();
             renderer.render(scene, camera);
+
+            // Actualizar la posición del hoverInfo si está visible
+            if (hoverInfo.style.display !== 'none') {
+                const vector = new THREE.Vector3();
+                const canvas = renderer.domElement;
+
+                vector.set(mouse.x, mouse.y, 0.5);
+                vector.unproject(camera);
+
+                vector.sub(camera.position).normalize();
+                const distance = - camera.position.z / vector.z;
+                const pos = camera.position.clone().add(vector.multiplyScalar(distance));
+
+                hoverInfo.style.left = (pos.x * canvas.width / 2 + canvas.width / 2) + 'px';
+                hoverInfo.style.top = (- pos.y * canvas.height / 2 + canvas.height / 2) + 'px';
+            }
         }
+
+        function updateResourceNodes() {
+            resourceNodes = resourceNodes.filter(node => {
+                if (node && node.resources <= 0) {
+                    if (node.mesh && node.mesh.parent) {
+                        node.mesh.parent.remove(node.mesh);
+                    }
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        // ... (código anterior sin cambios)
+
+        function onMouseMove(event) {
+            // Calcular la posición del mouse en coordenadas normalizadas (-1 a +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            // Actualizar el raycaster con la posición del mouse y la cámara
+            raycaster.setFromCamera(mouse, camera);
+
+            // Calcular objetos que intersectan con el rayo
+            const intersects = raycaster.intersectObjects(scene.children);
+
+            if (intersects.length > 0) {
+                // Buscar el primer objeto intersectado que sea un nodo de recursos
+                const resourceNode = resourceNodes.find(node => node.mesh === intersects[0].object);
+                if (resourceNode) {
+                    // Mostrar información del nodo de recursos
+                    hoverInfo.style.display = 'block';
+                    hoverInfo.style.left = event.clientX + 'px';
+                    hoverInfo.style.top = event.clientY + 'px';
+                    hoverInfo.textContent = `${resourceNode.type}`; // Eliminamos la cantidad de recursos
+                } else {
+                    hoverInfo.style.display = 'none';
+                }
+            } else {
+                hoverInfo.style.display = 'none';
+            }
+        }
+
+        // ... (código posterior sin cambios)
 
         // Event Listeners
         document.getElementById('advance-era').addEventListener('click', advanceEra);
@@ -1344,8 +2336,21 @@
             updateUnitButtons();
         });
 
+        // Añadir event listeners para el slider y los checkboxes
+        document.getElementById('worker-task-slider').addEventListener('input', updateWorkerBehavior);
+        document.getElementById('extract-food').addEventListener('change', updateWorkerBehavior);
+        document.getElementById('extract-wood').addEventListener('change', updateWorkerBehavior);
+        document.getElementById('extract-stone').addEventListener('change', updateWorkerBehavior);
+        document.getElementById('extract-gold').addEventListener('change', updateWorkerBehavior);
+
+        function updateWorkerBehavior() {
+            // Esta función se llamará cada vez que se cambie el slider o los checkboxes
+            // No necesitamos hacer nada aquí porque los trabajadores ya están leyendo estos valores en cada frame
+        }
+
         init();
     </script>
 </body>
 
 </html>
+
