@@ -2173,7 +2173,7 @@
         /* FORMA COLOR RECURSOS */
         const BASE_SCALE = 2; // Escala base para la comida
 
-        function createResourceNode(type) {
+                function createResourceNode(type) {
             let mesh;
             const terrainSize = 10000;
             const halfSize = terrainSize / 2;
@@ -2199,6 +2199,7 @@
                         mesh.add(smallSphere);
                     }
                     mesh.scale.multiplyScalar(BASE_SCALE);
+                    resourceAmount = 2500;
                     break;
 
                 case 'wood':
@@ -2216,6 +2217,7 @@
                     mesh.add(trunk);
                     mesh.add(leaves);
                     mesh.scale.multiplyScalar(BASE_SCALE * 6);
+                    resourceAmount = 500;
                     break;
 
                 case 'stone':
@@ -2225,6 +2227,7 @@
                     mesh = new THREE.Mesh(stoneGeometry, stoneMaterial);
                     mesh.scale.set(1, 0.7, 1);  // Aplanar un poco
                     mesh.scale.multiplyScalar(BASE_SCALE * 2);
+                    resourceAmount = 300000;
                     break;
 
                 case 'gold':
@@ -2233,17 +2236,18 @@
                     const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.7, roughness: 0.3 });
                     mesh = new THREE.Mesh(goldGeometry, goldMaterial);
                     mesh.scale.multiplyScalar(BASE_SCALE * 2);
+                    resourceAmount = 200000;
                     break;
             }
 
             mesh.position.set(
                 Math.random() * terrainSize - halfSize,
-                mesh.scale.y * 1.5, // Ajustar la altura según la escala
+                mesh.scale.y * 1.5,
                 Math.random() * terrainSize - halfSize
             );
 
             scene.add(mesh);
-            resourceNodes.push({ type: type, mesh: mesh, resources: 100 });
+            resourceNodes.push({ type: type, mesh: mesh, resources: resourceAmount });
         }
 
         function updatePopulation() {
