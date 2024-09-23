@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire Earth Onliner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="empire.png" />
+    <style>
+        body,
+        html {
+
+            /* PC version */
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #middle-nav {
+            position: fixed;
+            bottom: 90px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 1000;
+            border: 1px solid #444;
+        }
+
+        #bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 90px;
+            background: rgba(30, 30, 30, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-top: 1px solid #444;
+        }
+
+        #bottom-nav .button-grid {
+            display: grid;
+            gap: 0;
+            justify-content: center;
+        }
+
+        .nav-button-container {
+            position: relative;
+        }
+
+        .nav-button {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            padding: 0;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #444;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background-color: #3a3a3a;
+        }
+
+        .resource-info {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-button-container:hover .resource-info {
+            display: block;
+        }
+
+        #side-nav {
+            position: fixed;
+            top: 40px;
+            left: 0;
+            width: 180px;
+            bottom: 136px;
+            background: rgba(30, 30, 30, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            z-index: 1000;
+            border-right: 1px solid #444;
+        }
+
+        #side-nav .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 45px);
+            gap: 0px;
+        }
+
+        #side-nav .nav-button-container {
+            margin-bottom: 0px;
+            margin-left: 1px;
+        }
+
+        #side-nav .nav-button {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        #side-nav .resource-info {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            padding: 5px;
+            border-radius: 3px;
+            white-space: nowrap;
+            font-size: 12px;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s linear;
+        }
+
+        .era-button {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .era-button:hover {
+            background-color: #4a4a4a;
+        }
+
+        .era-button i {
+            font-size: 18px;
+        }
+
+        #config-menu {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.95);
+            color: #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #444;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #config-menu input {
+            width: 50px;
+            margin-right: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 5px;
+        }
+
+        #config-menu button {
+            margin-top: 20px;
+        }
+
+        #start-game {
+            background-color: #4a4a4a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #start-game:hover {
+            background-color: #5a5a5a;
+        }
+
+        #start-game::before {
+            content: "\f144";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+        }
+
+        .config-button {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-button:hover {
+            background-color: #4a4a4a;
+        }
+
+        .config-button i {
+            font-size: 18px;
+        }
+
+        /*Taber version */
+        @media (max-width: 1024px) {
+            #side-nav {
+                width: 120px;
+            }
+
+            #side-nav .button-grid {
+                grid-template-columns: repeat(2, 45px);
+            }
+
+            #bottom-nav {
+                height: 80px;
+            }
+
+            .nav-button {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            #middle-nav {
+                bottom: 80px;
+            }
+        }
+
+        /* Mobile version */
+        @media (max-width: 768px) {
+            #side-nav {
+                width: 90px;
+                bottom: 120px;
+            }
+
+            #side-nav .button-grid {
+                grid-template-columns: repeat(2, 40px);
+            }
+
+            #side-nav .nav-button {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            #bottom-nav {
+                height: 70px;
+            }
+
+            #bottom-nav .button-grid {
+                grid-template-columns: repeat(6, 35px);
+            }
+
+            .nav-button {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            #middle-nav {
+                bottom: 70px;
+                height: 50px;
+                flex-wrap: wrap;
+                justify-content: space-evenly;
+                padding: 5px 0;
+            }
+
+            .era-button {
+                padding: 5px 10px;
+                font-size: 14px;
+            }
+
+            #top-nav {
+                height: 30px;
+                font-size: 14px;
+            }
+
+            .resource-info {
+                font-size: 12px;
+                padding: 3px 6px;
+            }
+        }
+
+        #side-nav .nav-button-container {
+            display: block;
+        }
+
+        #side-nav.edad-prehistórica .nav-button-container[data-era="0"] {
+            display: block;
+        }
+
+        #side-nav.edad-de-piedra .nav-button-container[data-era="0"],
+        #side-nav.edad-de-piedra .nav-button-container[data-era="1"] {
+            display: block;
+        }
+
+        #side-nav.edad-de-cobre .nav-button-container[data-era="0"],
+        #side-nav.edad-de-cobre .nav-button-container[data-era="1"],
+        #side-nav.edad-de-cobre .nav-button-container[data-era="2"] {
+            display: block;
+        }
+
+        #side-nav.edad-de-bronce .nav-button-container[data-era="0"],
+        #side-nav.edad-de-bronce .nav-button-container[data-era="1"],
+        #side-nav.edad-de-bronce .nav-button-container[data-era="2"],
+        #side-nav.edad-de-bronce .nav-button-container[data-era="3"] {
+            display: block;
+        }
+
+        #side-nav.edad-oscura .nav-button-container[data-era="0"],
+        #side-nav.edad-oscura .nav-button-container[data-era="1"],
+        #side-nav.edad-oscura .nav-button-container[data-era="2"],
+        #side-nav.edad-oscura .nav-button-container[data-era="3"],
+        #side-nav.edad-oscura .nav-button-container[data-era="4"] {
+            display: block;
+        }
+
+        #side-nav.edad-media .nav-button-container[data-era="0"],
+        #side-nav.edad-media .nav-button-container[data-era="1"],
+        #side-nav.edad-media .nav-button-container[data-era="2"],
+        #side-nav.edad-media .nav-button-container[data-era="3"],
+        #side-nav.edad-media .nav-button-container[data-era="4"],
+        #side-nav.edad-media .nav-button-container[data-era="5"] {
+            display: block;
+        }
+
+        #side-nav.renacimiento .nav-button-container[data-era="0"],
+        #side-nav.renacimiento .nav-button-container[data-era="1"],
+        #side-nav.renacimiento .nav-button-container[data-era="2"],
+        #side-nav.renacimiento .nav-button-container[data-era="3"],
+        #side-nav.renacimiento .nav-button-container[data-era="4"],
+        #side-nav.renacimiento .nav-button-container[data-era="5"],
+        #side-nav.renacimiento .nav-button-container[data-era="6"] {
+            display: block;
+        }
+
+        #side-nav.edad-imperial .nav-button-container[data-era="0"],
+        #side-nav.edad-imperial .nav-button-container[data-era="1"],
+        #side-nav.edad-imperial .nav-button-container[data-era="2"],
+        #side-nav.edad-imperial .nav-button-container[data-era="3"],
+        #side-nav.edad-imperial .nav-button-container[data-era="4"],
+        #side-nav.edad-imperial .nav-button-container[data-era="5"],
+        #side-nav.edad-imperial .nav-button-container[data-era="6"],
+        #side-nav.edad-imperial .nav-button-container[data-era="7"] {
+            display: block;
+        }
+
+        #side-nav.edad-industrial .nav-button-container[data-era="0"],
+        #side-nav.edad-industrial .nav-button-container[data-era="1"],
+        #side-nav.edad-industrial .nav-button-container[data-era="2"],
+        #side-nav.edad-industrial .nav-button-container[data-era="3"],
+        #side-nav.edad-industrial .nav-button-container[data-era="4"],
+        #side-nav.edad-industrial .nav-button-container[data-era="5"],
+        #side-nav.edad-industrial .nav-button-container[data-era="6"],
+        #side-nav.edad-industrial .nav-button-container[data-era="7"],
+        #side-nav.edad-industrial .nav-button-container[data-era="8"] {
+            display: block;
+        }
+
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="0"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="1"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="2"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="3"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="4"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="5"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="6"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="7"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="8"],
+        #side-nav.edad-atómica-igm .nav-button-container[data-era="9"] {
+            display: block;
+        }
+
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="0"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="1"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="2"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="3"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="4"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="5"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="6"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="7"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="8"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="9"],
+        #side-nav.edad-atómica-iigm .nav-button-container[data-era="10"] {
+            display: block;
+        }
+
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="0"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="1"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="2"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="3"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="4"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="5"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="6"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="7"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="8"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="9"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="10"],
+        #side-nav.edad-atómica-moderna .nav-button-container[data-era="11"] {
+            display: block;
+        }
+
+        #side-nav.edad-digital .nav-button-container[data-era="0"],
+        #side-nav.edad-digital .nav-button-container[data-era="1"],
+        #side-nav.edad-digital .nav-button-container[data-era="2"],
+        #side-nav.edad-digital .nav-button-container[data-era="3"],
+        #side-nav.edad-digital .nav-button-container[data-era="4"],
+        #side-nav.edad-digital .nav-button-container[data-era="5"],
+        #side-nav.edad-digital .nav-button-container[data-era="6"],
+        #side-nav.edad-digital .nav-button-container[data-era="7"],
+        #side-nav.edad-digital .nav-button-container[data-era="8"],
+        #side-nav.edad-digital .nav-button-container[data-era="9"],
+        #side-nav.edad-digital .nav-button-container[data-era="10"],
+        #side-nav.edad-digital .nav-button-container[data-era="11"],
+        #side-nav.edad-digital .nav-button-container[data-era="12"] {
+            display: block;
+        }
+
+        #side-nav.nano-edad .nav-button-container[data-era="0"],
+        #side-nav.nano-edad .nav-button-container[data-era="1"],
+        #side-nav.nano-edad .nav-button-container[data-era="2"],
+        #side-nav.nano-edad .nav-button-container[data-era="3"],
+        #side-nav.nano-edad .nav-button-container[data-era="4"],
+        #side-nav.nano-edad .nav-button-container[data-era="5"],
+        #side-nav.nano-edad .nav-button-container[data-era="6"],
+        #side-nav.nano-edad .nav-button-container[data-era="7"],
+        #side-nav.nano-edad .nav-button-container[data-era="8"],
+        #side-nav.nano-edad .nav-button-container[data-era="9"],
+        #side-nav.nano-edad .nav-button-container[data-era="10"],
+        #side-nav.nano-edad .nav-button-container[data-era="11"],
+        #side-nav.nano-edad .nav-button-container[data-era="12"],
+        #side-nav.nano-edad .nav-button-container[data-era="13"] {
+            display: block;
+        }
+
+        #side-nav.era-espacial .nav-button-container {
+            display: block;
+        }
+
+        /* NAV DERECHO */
+
+        #worker-control-nav {
+            position: fixed;
+            top: 40px;
+            /* Ajusta esto según la altura de tu top-nav */
+            right: 0;
+            width: 200px;
+            /* Ajusta el ancho según tus necesidades */
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            padding: 10px;
+            z-index: 1000;
+            border-left: 1px solid #444;
+            bottom: 136px;
+            /* Ajusta esto según la altura de tu middle-nav y bottom-nav */
+            overflow-y: auto;
+        }
+
+        #worker-controls {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #worker-controls h3 {
+            margin-top: 0;
+            font-size: 16px;
+        }
+
+        .slider-container {
+            margin-bottom: 10px;
+        }
+
+        #worker-task-slider {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .resource-checkboxes {
+            font-size: 14px;
+        }
+
+        .resource-checkboxes h4 {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .resource-checkboxes label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+    <div id="game-container"></div>
+
+    <nav id="top-nav">
+        <div style="flex: 1;"></div> <!-- Espacio flexible a la izquierda -->
+        <p style="flex: 1; text-align: center;font-size: x-large;font-family: Arial black, Helvetica, sans-serif;"><span
+                id="era-name">Prehistoria</span></p>
+        <div style="flex: 1; display: flex; justify-content: flex-end; padding-right: 40px;">
+            <button id="open-config" class="config-button">
+                <i class="fas fa-cog"></i>
+                Configuración Inicial
+            </button>
+        </div>
+    </nav>
+
+    <nav id="side-nav" class="edad-prehistorica">
+        <div class="button-grid">
+            <!-- Los botones de unidades se generarán aquí dinámicamente -->
+        </div>
+    </nav>
+
+<nav id="worker-control-nav">
+        <div id="worker-controls">
+            <h3>Control de Trabajadores</h3>
+            <div class="slider-container">
+                <input type="range" id="worker-task-slider" min="0" max="2" value="1" step="1">
+                <div class="slider-labels">
+                    <span>Nada</span>
+                    <span>Recolectar</span>
+                    <span>Defender</span>
+                </div>
+            </div>
+            <div class="resource-checkboxes">
+                <h4>Recursos a extraer:</h4>
+                <label><input type="checkbox" id="extract-food" checked> Comida</label>
+                <label><input type="checkbox" id="extract-wood" checked> Madera</label>
+                <label><input type="checkbox" id="extract-stone" checked> Piedra</label>
+                <label><input type="checkbox" id="extract-gold" checked> Oro</label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav id="middle-nav">
+        <button id="advance-era" class="era-button">
+            <i class="fas fa-chevron-up"></i>
+            <span>Avanzar Era</span>
+        </button>
+        <p>Población: <span id="population">0</span></p>
+        <p><img src="imagen_alimento.png" alt="Alimento" width="20" height="20"> Alimento: <span id="food" style="background: transparent;">0</span></p>
+        <p><img src="imagen_madera.png" alt="Madera" width="30" height="30"> Madera: <span id="wood">0</span></p>
+        <p><img src="imagen_piedra.png" alt="Piedra" width="30" height="30"> Piedra: <span id="stone">0</span></p>
+        <p><img src="imagen_oro.png" alt="Oro" width="30" height="30"> Oro: <span id="gold">0</span></p>
+    </nav>
+
+    <nav id="bottom-nav" class="edad-prehistorica">
+        <div class="button-grid">
+            <!-- Los botones se generarán dinámicamente con JavaScript -->
+        </div>
+    </nav>
+
+    <div id="config-menu" style="display: none;">
+        <!--         <h3>Configuración de Partida</h3> -->
+        <p>
+            <label for="initial-food">Alimento inicial:</label>
+            <input type="number" id="initial-food" value="300" min="0" max="600" class="resource-input" data-max="600">
+        </p>
+        <p>
+            <label for="initial-wood">Madera inicial:</label>
+            <input type="number" id="initial-wood" value="500" min="0" max="1000" class="resource-input"
+                data-max="1000">
+        </p>
+        <p>
+            <label for="initial-stone">Piedra inicial:</label>
+            <input type="number" id="initial-stone" value="150" min="0" max="300" class="resource-input" data-max="300">
+        </p>
+        <p>
+            <label for="initial-gold">Oro inicial:</label>
+            <input type="number" id="initial-gold" value="50" min="0" max="100" class="resource-input" data-max="100">
+        </p>
+        <p>
+            <label for="food-nodes">Alimento:</label>
+            <input type="number" id="food-nodes" value="10" min="0" max="20" class="resource-node-input" data-max="50">
+        </p>
+        <p>
+            <label for="wood-nodes">Madera:</label>
+            <input type="number" id="wood-nodes" value="125" min="0" max="250" class="resource-node-input"
+                data-max="500">
+        </p>
+        <p>
+            <label for="stone-nodes">Piedra:</label>
+            <input type="number" id="stone-nodes" value="15" min="0" max="30" class="resource-node-input"
+                data-max="100">
+        </p>
+        <p>
+            <label for="gold-nodes">Oro:</label>
+            <input type="number" id="gold-nodes" value="10" min="0" max="20" class="resource-node-input" data-max="50">
+        </p>
+        <button id="start-game">Comenzar Partida</button>
+    </div>
+    <div id="hover-info"></div>
+    <script>
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
+        const moveSpeed = 7;
+        const cameraHeight = 100; // Altura constante de la cámara
+        let scene, camera, renderer, raycaster, mouse;
+        let base, resourceNodes = [], units = [], buildings = [];
+        let currentEra = 0;
+        const eras = [
+            { name: 'Edad Prehistórica', color: 0x8B4513 },
+            { name: 'Edad de Piedra', color: 0x8B4513 },
+            { name: 'Edad de Cobre', color: 0x8B4513 },
+            { name: 'Edad de Bronce', color: 0x8B4513 },
+            { name: 'Edad Oscura', color: 0x8B4513 },
+            { name: 'Edad Media', color: 0x8B4513 },
+            { name: 'Renacimiento', color: 0x8B4513 },
+            { name: 'Edad Imperial', color: 0x8B4513 },
+            { name: 'Edad Industrial', color: 0x8B4513 },
+            { name: 'Edad Atómica (IGM)', color: 0x8B4513 },
+            { name: 'Edad Atómica (IIGM)', color: 0x8B4513 },
+            { name: 'Edad Atómica (Moderna)', color: 0x8B4513 },
+            { name: 'Edad Digital', color: 0x8B4513 },
+            { name: 'Nano Edad', color: 0x8B4513 },
+            { name: 'Era Espacial', color: 0x8B4513 }
+        ];
+        let resources = {
+            food: 0,
+            wood: 0,
+            stone: 0,
+            gold: 0
+        };
+        let gameStarted = false;
+        const buildingButtons = [
+            // Edad Prehistórica
+            { id: 'build-house', icon: 'fas fa-home', name: 'Casa', cost: '30 madera, 20 piedra' },
+
+            // Edad de Piedra
+            { id: 'build-farm', icon: 'fas fa-tractor', name: 'Granja', cost: '40 madera, 20 piedra' },
+
+            // Edad de Cobre
+            { id: 'build-mine', icon: 'fas fa-gem', name: 'Mina', cost: '60 madera, 40 piedra' },
+
+            // Edad de Bronce
+            { id: 'build-barracks', icon: 'fas fa-fort-awesome', name: 'Cuartel', cost: '50 madera, 30 piedra' },
+
+            // Edad Oscura
+            { id: 'build-tower', icon: 'fas fa-chess-rook', name: 'Torre', cost: '80 piedra, 40 madera' },
+
+            // Edad Media
+            { id: 'build-workshop', icon: 'fas fa-hammer', name: 'Taller', cost: '80 madera, 60 piedra' },
+            { id: 'build-castle', icon: 'fas fa-chess-rook', name: 'Castillo', cost: '300 piedra, 200 madera, 100 oro' },
+
+            // Renacimiento
+            { id: 'build-market', icon: 'fas fa-store', name: 'Mercado', cost: '70 madera, 50 piedra, 20 oro' },
+            { id: 'build-dock', icon: 'fas fa-ship', name: 'Muelle', cost: '100 madera, 30 piedra' },
+
+            // Edad Imperial
+            { id: 'build-temple', icon: 'fas fa-place-of-worship', name: 'Templo', cost: '100 piedra, 50 oro' },
+            { id: 'build-university', icon: 'fas fa-university', name: 'Universidad', cost: '150 piedra, 100 madera, 50 oro' },
+
+            // Edad Industrial
+            { id: 'build-factory', icon: 'fas fa-industry', name: 'Fábrica', cost: '200 piedra, 150 madera, 80 oro' },
+
+            // Edad Atómica (IGM)
+            { id: 'build-laboratory', icon: 'fas fa-flask', name: 'Laboratorio', cost: '180 piedra, 120 madera, 100 oro' },
+
+            // Edad Atómica (IIGM)
+            // No hay nuevos edificios en esta era
+
+            // Edad Atómica (Moderna)
+            { id: 'build-quantum-computer', icon: 'fas fa-atom', name: 'Computadora Cuántica', cost: '600 piedra, 400 madera, 500 oro' },
+
+            // Edad Digital
+            { id: 'build-ai-core', icon: 'fas fa-brain', name: 'Núcleo IA', cost: '500 piedra, 300 madera, 400 oro' },
+
+            // Nano Edad
+            { id: 'build-fusion-reactor', icon: 'fas fa-atom', name: 'Reactor de Fusión', cost: '700 piedra, 500 madera, 600 oro' },
+
+            // Era Espacial
+            { id: 'build-spaceport', icon: 'fas fa-rocket', name: 'Puerto Espacial', cost: '500 piedra, 300 madera, 200 oro' },
+            { id: 'build-space-elevator', icon: 'fas fa-space-shuttle', name: 'Elevador Espacial', cost: '1000 piedra, 800 madera, 1000 oro' },
+        ];
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('game-container').appendChild(renderer.domElement);
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            createTerrain();
+            setupLighting();
+            setupCamera();
+            setupKeyControls();
+
+            updateUnitButtons();
+            updateBuildingButtons();
+
+            // Crear un elemento para mostrar la información al pasar el mouse
+            hoverInfo = document.createElement('div');
+            hoverInfo.style.position = 'absolute';
+            hoverInfo.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            hoverInfo.style.color = 'white';
+            hoverInfo.style.padding = '5px';
+            hoverInfo.style.borderRadius = '5px';
+            hoverInfo.style.display = 'none';
+            document.body.appendChild(hoverInfo);
+
+            // Añadir event listener para el movimiento del mouse
+            renderer.domElement.addEventListener('mousemove', onMouseMove, false);
+        }
+
+        /* MAXIMO RECURSOS BASE*/
+        document.querySelectorAll('.resource-input').forEach(input => {
+            const validateInput = function () {
+                let value = parseInt(this.value);
+                if (isNaN(value)) {
+                    value = 0;
+                }
+                const max = parseInt(this.dataset.max);
+                value = Math.min(max, Math.max(0, value));
+                this.value = value;
+            };
+
+            input.addEventListener('input', validateInput);
+            input.addEventListener('change', validateInput);
+            input.addEventListener('blur', validateInput);
+            input.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter') {
+                    validateInput.call(this);
+                }
+            });
+        });
+        /* MaXIMO RECURSOS MAPA */
+        document.querySelectorAll('.resource-node-input').forEach(input => {
+            const validateInput = function () {
+                let value = parseInt(this.value);
+                if (isNaN(value)) {
+                    value = 0;
+                }
+                const max = parseInt(this.dataset.max);
+                value = Math.min(max, Math.max(0, value));
+                this.value = value;
+            };
+
+            input.addEventListener('input', validateInput);
+            input.addEventListener('change', validateInput);
+            input.addEventListener('blur', validateInput);
+            input.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter') {
+                    validateInput.call(this);
+                }
+            });
+        });
+
+        function setupCamera() {
+            camera.position.set(0, cameraHeight, 200);
+            camera.lookAt(0, 0, 0);
+        }
+        /* CAMARA */
+        function setupCamera() {
+            camera.position.set(0, cameraHeight, 200);
+            camera.lookAt(0, 0, 0);
+        }
+        /* CONTROLES */
+        function setupKeyControls() {
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+        }
+        function onKeyDown(event) {
+            switch (event.keyCode) {
+                case 87: // W
+                    moveForward = true;
+                    break;
+                case 83: // S
+                    moveBackward = true;
+                    break;
+                case 65: // A
+                    moveLeft = true;
+                    break;
+                case 68: // D
+                    moveRight = true;
+                    break;
+            }
+        }
+        function onKeyUp(event) {
+            switch (event.keyCode) {
+                case 87: // W
+                    moveForward = false;
+                    break;
+                case 83: // S
+                    moveBackward = false;
+                    break;
+                case 65: // A
+                    moveLeft = false;
+                    break;
+                case 68: // D
+                    moveRight = false;
+                    break;
+            }
+        }
+        function updateCamera() {
+            if (moveForward) camera.position.z -= moveSpeed;
+            if (moveBackward) camera.position.z += moveSpeed;
+            if (moveLeft) camera.position.x -= moveSpeed;
+            if (moveRight) camera.position.x += moveSpeed;
+
+            camera.position.y = cameraHeight; // Mantener altura constante
+
+            // Ajusta estos valores para cambiar el ángulo de la cámara
+            const lookAtHeight = 0; // Mira hacia el suelo
+            const lookAtDistance = 200; // Distancia del punto de mira
+
+            camera.lookAt(
+                camera.position.x,
+                lookAtHeight,
+                camera.position.z - lookAtDistance
+            );
+
+            // console.log('Posición de la cámara:', camera.position); // Comenta esta línea si no necesitas el log constante
+        }
+
+        /* TeRRENO */
+        function createTerrain() {
+            const geometry = new THREE.PlaneGeometry(10000, 10000);
+            const material = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
+            const terrain = new THREE.Mesh(geometry, material);
+            terrain.rotation.x = -Math.PI / 2;
+            scene.add(terrain);
+        }
+        /* LUZ */
+        function setupLighting() {
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(0, 1, 0);
+            scene.add(directionalLight);
+        }
+        /* UNIDADES */
+        function updateUnitButtons() {
+            console.log('Actualizando botones de unidades. Era actual:', currentEra);
+            const buttonGrid = document.querySelector('#side-nav .button-grid');
+            if (!buttonGrid) {
+                console.error('No se encontró el elemento .button-grid dentro de #side-nav');
+                return;
+            }
+            buttonGrid.innerHTML = ''; // Limpiar botones existentes
+
+            const unitButtons = [
+                { id: 'create-worker', icon: 'fas fa-user', name: 'Ciudadano', cost: '20 alimento', era: 0 },
+
+                { id: 'create-scout', icon: 'fas fa-eye', name: 'Explorador', cost: '25 alimento', era: 3 },
+                { id: 'create-soldier', icon: 'fas fa-shield-alt', name: 'Soldado', cost: '30 alimento, 10 oro', era: 3 },
+                { id: 'create-archer', icon: 'fas fa-bullseye', name: 'Arquero', cost: '40 alimento, 20 madera', era: 3 },
+                { id: 'create-spearman', icon: 'fas fa-khanda', name: 'Lancero', cost: '35 alimento, 15 madera', era: 3 },
+                { id: 'create-spearman', icon: 'fas fa-khanda', name: 'Lancero', cost: '35 alimento, 15 madera', era: 3 },
+
+                { id: 'create-knight', icon: 'fas fa-chess-knight', name: 'Caballero', cost: '60 alimento, 40 oro', era: 5 },
+                { id: 'create-longbowman', icon: 'fas fa-bullseye', name: 'Arquero largo', cost: '45 alimento, 30 madera', era: 5 },
+                { id: 'create-pikeman', icon: 'fas fa-khanda', name: 'Piquero', cost: '40 alimento, 25 madera', era: 5 },
+                { id: 'create-knight', icon: 'fas fa-chess-knight', name: 'Caballero', cost: '60 alimento, 40 oro', era: 5 },
+                { id: 'create-longbowman', icon: 'fas fa-bullseye', name: 'Arquero largo', cost: '45 alimento, 30 madera', era: 5 },
+                { id: 'create-knight', icon: 'fas fa-chess-knight', name: 'Caballero', cost: '60 alimento, 40 oro', era: 5 },
+                { id: 'create-longbowman', icon: 'fas fa-bullseye', name: 'Arquero largo', cost: '45 alimento, 30 madera', era: 5 },
+                { id: 'create-pikeman', icon: 'fas fa-khanda', name: 'Piquero', cost: '40 alimento, 25 madera', era: 5 },
+                { id: 'create-knight', icon: 'fas fa-chess-knight', name: 'Caballero', cost: '60 alimento, 40 oro', era: 5 },
+                { id: 'create-longbowman', icon: 'fas fa-bullseye', name: 'Arquero largo', cost: '45 alimento, 30 madera', era: 5 },
+
+                { id: 'create-crossbowman', icon: 'fas fa-crosshairs', name: 'Ballestero', cost: '40 alimento, 35 madera', era: 6 },
+                { id: 'create-halberdier', icon: 'fas fa-axe', name: 'Alabardero', cost: '45 alimento, 30 madera', era: 6 },
+                { id: 'create-crossbowman', icon: 'fas fa-crosshairs', name: 'Ballestero', cost: '40 alimento, 35 madera', era: 6 },
+                { id: 'create-halberdier', icon: 'fas fa-axe', name: 'Alabardero', cost: '45 alimento, 30 madera', era: 6 },
+                { id: 'create-crossbowman', icon: 'fas fa-crosshairs', name: 'Ballestero', cost: '40 alimento, 35 madera', era: 6 },
+                { id: 'create-halberdier', icon: 'fas fa-axe', name: 'Alabardero', cost: '45 alimento, 30 madera', era: 6 },
+                { id: 'create-crossbowman', icon: 'fas fa-crosshairs', name: 'Ballestero', cost: '40 alimento, 35 madera', era: 6 },
+                { id: 'create-halberdier', icon: 'fas fa-axe', name: 'Alabardero', cost: '45 alimento, 30 madera', era: 6 },
+                { id: 'create-crossbowman', icon: 'fas fa-crosshairs', name: 'Ballestero', cost: '40 alimento, 35 madera', era: 6 },
+                { id: 'create-halberdier', icon: 'fas fa-axe', name: 'Alabardero', cost: '45 alimento, 30 madera', era: 6 },
+
+
+                { id: 'create-rifleman', icon: 'fas fa-user-secret', name: 'Fusilero', cost: '40 alimento, 40 oro', era: 8 },
+                { id: 'create-grenadier', icon: 'fas fa-bomb', name: 'Granadero', cost: '50 alimento, 35 oro', era: 8 },
+                { id: 'create-cavalry-officer', icon: 'fas fa-horse', name: 'Oficial de caballería', cost: '70 alimento, 50 oro', era: 8 },
+                { id: 'create-field-gun', icon: 'fas fa-bullseye', name: 'Cañón de campaña', cost: '140 madera, 80 oro', era: 8 },
+                { id: 'create-field-gun', icon: 'fas fa-bullseye', name: 'Cañón de campaña', cost: '140 madera, 80 oro', era: 8 },
+
+                { id: 'create-nanobot', icon: 'fas fa-microchip', name: 'Nanobot', cost: '200 oro, 150 piedra', era: 13 },
+                { id: 'create-mech', icon: 'fas fa-robot', name: 'Mecha', cost: '300 oro, 200 piedra', era: 13 },
+                { id: 'create-plasma-tank', icon: 'fas fa-atom', name: 'Tanque de plasma', cost: '350 oro, 250 piedra', era: 13 },
+                { id: 'create-energy-shield', icon: 'fas fa-shield-alt', name: 'Escudo de energía', cost: '250 oro, 150 piedra', era: 13 },
+                { id: 'create-energy-shield', icon: 'fas fa-shield-alt', name: 'Escudo de energía', cost: '250 oro, 150 piedra', era: 13 },
+
+                { id: 'create-spaceship', icon: 'fas fa-rocket', name: 'Nave espacial', cost: '500 oro, 300 piedra', era: 14 },
+                { id: 'create-starfighter', icon: 'fas fa-user-astronaut', name: 'Caza estelar', cost: '400 oro, 250 piedra', era: 14 },
+                { id: 'create-orbital-cannon', icon: 'fas fa-satellite', name: 'Cañón orbital', cost: '600 oro, 400 piedra', era: 14 },
+                { id: 'create-gravity-manipulator', icon: 'fas fa-globe', name: 'Manipulador gravitacional', cost: '550 oro, 350 piedra', era: 14 },
+                { id: 'create-time-distorter', icon: 'fas fa-hourglass', name: 'Distorsionador temporal', cost: '700 oro, 500 piedra', era: 14 },
+            ];
+
+            for (let button of unitButtons) {
+                if (button.era <= currentEra) {
+                    const buttonHTML = `
+    <div class="nav-button-container" data-era="${button.era}">
+        <button class="nav-button" id="${button.id}"><i class="${button.icon}"></i></button>
+        <div class="resource-info">${button.name}: ${button.cost}</div>
+    </div>
+`;
+                    buttonGrid.innerHTML += buttonHTML;
+                }
+            }
+
+            addUnitEventListeners();
+        }
+        /* EDIFICIOS */
+        function updateBuildingButtons() {
+            const buttonGrid = document.querySelector('#bottom-nav .button-grid');
+            buttonGrid.innerHTML = ''; // Limpiar botones existentes
+
+            let numButtons;
+            switch (currentEra) {
+                case 0: numButtons = 1; break; // Edad Prehistórica
+                case 1: numButtons = 2; break; // Edad de Piedra
+                case 2: numButtons = 3; break; // Edad de Cobre
+                case 3: numButtons = 4; break; // Edad de Bronce
+                case 4: numButtons = 5; break; // Edad Oscura
+                case 5: numButtons = 7; break; // Edad Media
+                case 6: numButtons = 9; break; // Renacimiento
+                case 7: numButtons = 11; break; // Edad Imperial
+                case 8: numButtons = 12; break; // Edad Industrial
+                case 9: numButtons = 13; break; // Edad Atómica (IGM)
+                case 10: numButtons = 13; break; // Edad Atómica (IIGM)
+                case 11: numButtons = 14; break; // Edad Atómica (Moderna)
+                case 12: numButtons = 15; break; // Edad Digital
+                case 13: numButtons = 16; break; // Nano Edad
+                case 14: numButtons = 18; break; // Era Espacial
+                default: numButtons = buildingButtons.length; break;
+            }
+
+            for (let i = 0; i < numButtons && i < buildingButtons.length; i++) {
+                const button = buildingButtons[i];
+                const buttonHTML = `
+                    <div class="nav-button-container">
+                        <button class="nav-button" id="${button.id}"><i class="${button.icon}"></i></button>
+                        <div class="resource-info">${button.name}: ${button.cost}</div>
+                    </div>
+                `;
+                buttonGrid.innerHTML += buttonHTML;
+            }
+
+            // Actualizar el estilo del grid
+            const columns = Math.min(numButtons, 9);
+            const rows = Math.ceil(numButtons / 9);
+            buttonGrid.style.gridTemplateColumns = `repeat(${columns}, 45px)`;
+            buttonGrid.style.gridTemplateRows = `repeat(${rows}, 45px)`;
+
+            addBuildingEventListeners();
+        }
+
+        function addUnitEventListeners() {
+            const unitButtons = document.querySelectorAll('#side-nav .nav-button');
+            unitButtons.forEach(button => {
+                button.addEventListener('click', () => createUnit(button.id.replace('create-', '')));
+            });
+        }
+
+        function addBuildingEventListeners() {
+            buildingButtons.forEach(button => {
+                const element = document.getElementById(button.id);
+                if (element) {
+                    element.addEventListener('click', () => createBuilding(button.id.replace('build-', '')));
+                }
+            });
+        }
+        /* AVANZAR ERA */
+        function advanceEra() {
+            if (currentEra < eras.length - 1 &&
+                resources.food >= 100 && resources.wood >= 50 && resources.stone >= 50 && resources.gold >= 50) {
+                resources.food -= 100;
+                resources.wood -= 50;
+                resources.stone -= 50;
+                resources.gold -= 50;
+
+                currentEra++;
+                document.getElementById('era-name').textContent = eras[currentEra].name;
+
+                base.upgrade();
+                units.forEach(unit => unit.evolve());
+
+                updateResourceDisplay();
+
+                const bottomNav = document.getElementById('bottom-nav');
+                bottomNav.className = eras[currentEra].name.toLowerCase().replace(/ /g, '-');
+
+                const sideNav = document.getElementById('side-nav');
+                sideNav.className = eras[currentEra].name.toLowerCase().replace(/ /g, '-');
+                updateUnitButtons();
+                updateBuildingButtons();
+            }
+        }
+
+        function updateResourceDisplay() {
+            for (let resource in resources) {
+                document.getElementById(resource).textContent = resources[resource];
+            }
+        }
+
+        function startGame() {
+            resources.food = parseInt(document.getElementById('initial-food').value);
+            resources.wood = parseInt(document.getElementById('initial-wood').value);
+            resources.stone = parseInt(document.getElementById('initial-stone').value);
+            resources.gold = parseInt(document.getElementById('initial-gold').value);
+
+            createResourceNodes();
+            updateResourceDisplay();
+            document.getElementById('config-menu').style.display = 'none';
+            gameStarted = true;
+
+            base = new Base();
+            animate();
+
+            updateUnitButtons();
+            updateBuildingButtons();
+        }
+        /* BASE */
+        class Base {
+            constructor() {
+                this.level = 1;
+                this.mesh = this.createMesh();
+                scene.add(this.mesh);
+            }
+
+            createMesh() {
+                let geometry, material;
+                switch (currentEra) {
+                    case 0: // Edad Prehistórica
+                        geometry = new THREE.Group();
+
+                        // Piedras alrededor
+                        for (let i = 0; i < 12; i++) {
+                            const stoneGeometry = new THREE.DodecahedronGeometry(1.5, 1);
+                            const stone = new THREE.Mesh(stoneGeometry, new THREE.MeshPhongMaterial({
+                                color: 0x808080,
+                                shininess: 10,
+                                specular: 0x111111
+                            }));
+                            stone.position.set(
+                                5 * Math.cos(i * Math.PI / 6),
+                                Math.random() * 0.5,
+                                5 * Math.sin(i * Math.PI / 6)
+                            );
+                            stone.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                            stone.scale.set(1 + Math.random() * 0.5, 0.7 + Math.random() * 0.3, 1 + Math.random() * 0.5);
+                            geometry.add(stone);
+                        }
+
+                        // Troncos
+                        for (let i = 0; i < 7; i++) {
+                            const trunkGeometry = new THREE.CylinderGeometry(0.4, 0.5, 6, 8);
+                            const trunk = new THREE.Mesh(trunkGeometry, new THREE.MeshLambertMaterial({
+                                color: 0x8B4513
+                            }));
+                            trunk.position.set(
+                                3 * Math.cos(i * Math.PI / 3.5),
+                                3,
+                                3 * Math.sin(i * Math.PI / 3.5)
+                            );
+                            trunk.rotation.x = Math.PI / 4 + Math.random() * 0.2;
+                            trunk.rotation.z = i * Math.PI / 3.5 + Math.random() * 0.2;
+                            geometry.add(trunk);
+                        }
+
+                        // Función para crear una hoguera
+                        function createBonfire(x, z, scale = 1) {
+                            const bonfire = new THREE.Group();
+
+                            // Llamas
+                            for (let i = 0; i < 5; i++) {
+                                const singleFlameGeometry = new THREE.ConeGeometry(1 + Math.random(), 4 + Math.random() * 2, 8);
+                                const flame = new THREE.Mesh(singleFlameGeometry, new THREE.MeshBasicMaterial({
+                                    color: new THREE.Color(0xFF6600).offsetHSL(0, 0, Math.random() * 0.2),
+                                    transparent: true,
+                                    opacity: 0.7
+                                }));
+                                flame.position.set(
+                                    Math.random() * 2 - 1,
+                                    3 + Math.random() * 2,
+                                    Math.random() * 2 - 1
+                                );
+                                flame.rotation.y = Math.random() * Math.PI * 2;
+                                bonfire.add(flame);
+                            }
+
+                            // Luz parpadeante
+                            const fireLight = new THREE.PointLight(0xFF6600, 1, 20);
+                            fireLight.position.set(0, 6, 0);
+                            bonfire.add(fireLight);
+
+                            bonfire.position.set(x, 0, z);
+                            bonfire.scale.set(scale, scale, scale);
+                            return bonfire;
+                        }
+
+                        // Hoguera principal
+                        const mainBonfire = createBonfire(0, 0, 1.2);
+                        geometry.add(mainBonfire);
+
+                        // Hogueras adicionales
+                        const additionalBonfires = [
+                            { x: 12, z: 12, scale: 0.8 },
+                            { x: -12, z: 12, scale: 0.7 },
+                            { x: 12, z: -12, scale: 0.9 },
+                            { x: -12, z: -12, scale: 0.75 }
+                        ];
+
+                        additionalBonfires.forEach(bonfire => {
+                            geometry.add(createBonfire(bonfire.x, bonfire.z, bonfire.scale));
+                        });
+
+                        // Animación de las llamas y luces
+                        function animateFire() {
+                            requestAnimationFrame(animateFire);
+                            geometry.children.forEach(child => {
+                                if (child instanceof THREE.Group) {
+                                    child.children.forEach(element => {
+                                        if (element instanceof THREE.Mesh && element.geometry instanceof THREE.ConeGeometry) {
+                                            element.scale.y = 1 + Math.sin(Date.now() * 0.01 + Math.random()) * 0.1;
+                                            element.rotation.y += 0.03;
+                                            element.material.opacity = 0.5 + Math.random() * 0.5;
+                                        } else if (element instanceof THREE.PointLight) {
+                                            element.intensity = 1 + Math.random() * 0.3;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        animateFire();
+
+                        // Ajustar la posición del grupo completo para que esté en el suelo
+                        geometry.position.y = 0;
+
+                        break;
+
+                    case 1: // Edad de Piedra
+                        geometry = new THREE.Group();
+
+                        // Choza principal
+                        const hutGeometry = new THREE.ConeGeometry(4, 6, 8);
+                        const hutMaterial = new THREE.MeshStandardMaterial({ color: 0xD2B48C }); // Color paja
+                        const hut = new THREE.Mesh(hutGeometry, hutMaterial);
+                        hut.position.y = 3;
+                        geometry.add(hut);
+
+                        // Base de madera
+                        const baseGeometry = new THREE.CylinderGeometry(5, 5, 1, 8);
+                        const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Color madera
+                        const baseStructure = new THREE.Mesh(baseGeometry, baseMaterial);
+                        baseStructure.position.y = 1;
+                        geometry.add(baseStructure);
+
+                        // Piedras alrededor
+                        for (let i = 0; i < 8; i++) {
+                            const stoneGeometry = new THREE.DodecahedronGeometry(0.8, 1);
+                            const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 }); // Color piedra
+                            const stone = new THREE.Mesh(stoneGeometry, stoneMaterial);
+                            const angle = (i / 8) * Math.PI * 2;
+                            stone.position.set(
+                                Math.cos(angle) * 5,
+                                -0.5,
+                                Math.sin(angle) * 5
+                            );
+                            stone.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                            stone.scale.set(1 + Math.random() * 0.5, 0.7 + Math.random() * 0.3, 1 + Math.random() * 0.5);
+                            geometry.add(stone);
+                        }
+
+                        // Chozas más pequeñas
+                        for (let i = 0; i < 3; i++) {
+                            const smallHutGeometry = new THREE.ConeGeometry(2, 3, 8);
+                            const smallHut = new THREE.Mesh(smallHutGeometry, hutMaterial);
+                            const angle = (i / 3) * Math.PI * 2;
+                            smallHut.position.set(
+                                Math.cos(angle) * 7,
+                                1.5,
+                                Math.sin(angle) * 7
+                            );
+                            geometry.add(smallHut);
+                        }
+
+                        break;
+
+                    case 2: // Edad de Cobre
+                        geometry = new THREE.Group();
+
+                        // Cabaña principal
+                        const mainHutGeometry = new THREE.CylinderGeometry(3, 4, 5, 8);
+                        const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xD2B48C }); // Color arcilla
+                        const mainHut = new THREE.Mesh(mainHutGeometry, wallMaterial);
+                        mainHut.position.y = 2.5;
+                        geometry.add(mainHut);
+
+                        // Techo de madera
+                        const roofGeometry = new THREE.ConeGeometry(5, 3, 8);
+                        const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Color madera
+                        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+                        roof.position.y = 6.5;
+                        geometry.add(roof);
+
+                        // Cabañas más pequeñas
+                        for (let i = 0; i < 3; i++) {
+                            const smallHut = new THREE.Group();
+
+                            const smallHutBody = new THREE.Mesh(
+                                new THREE.CylinderGeometry(1.5, 2, 3, 8),
+                                wallMaterial
+                            );
+                            smallHut.add(smallHutBody);
+
+                            const smallRoof = new THREE.Mesh(
+                                new THREE.ConeGeometry(2.5, 2, 8),
+                                roofMaterial
+                            );
+                            smallRoof.position.y = 2.5;
+                            smallHut.add(smallRoof);
+
+                            smallHut.position.set(
+                                Math.cos(i * Math.PI * 2 / 3) * 6,
+                                1.5,
+                                Math.sin(i * Math.PI * 2 / 3) * 6
+                            );
+                            geometry.add(smallHut);
+                        }
+
+                        // Herramientas de cobre
+                        for (let i = 0; i < 5; i++) {
+                            const toolGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
+                            const copperMaterial = new THREE.MeshStandardMaterial({ color: 0xB87333 }); // Color cobre
+                            const tool = new THREE.Mesh(toolGeometry, copperMaterial);
+                            tool.position.set(
+                                Math.random() * 8 - 4,
+                                0.5,
+                                Math.random() * 8 - 4
+                            );
+                            tool.rotation.z = Math.PI / 4;
+                            geometry.add(tool);
+                        }
+
+                        break;
+
+                    case 3: // Edad de Bronce
+                        geometry = new THREE.Group();
+
+                        // Casa principal de piedra
+                        const mainHouseGeometry = new THREE.BoxGeometry(8, 6, 8);
+                        const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 }); // Color piedra
+                        const mainHouse = new THREE.Mesh(mainHouseGeometry, stoneMaterial);
+                        mainHouse.position.y = 3;
+                        geometry.add(mainHouse);
+
+                        // Techo de bronce para la casa principal
+                        const mainRoofGeometry = new THREE.ConeGeometry(6, 4, 4);
+                        const bronzeMaterial = new THREE.MeshStandardMaterial({ color: 0xCD7F32 }); // Color bronce
+                        const mainRoof = new THREE.Mesh(mainRoofGeometry, bronzeMaterial);
+                        mainRoof.position.y = 8;
+                        geometry.add(mainRoof);
+
+                        // Casas más pequeñas
+                        for (let i = 0; i < 3; i++) {
+                            const smallHouse = new THREE.Group();
+
+                            const houseGeometry = new THREE.BoxGeometry(4, 3, 4);
+                            const house = new THREE.Mesh(houseGeometry, stoneMaterial);
+                            house.position.y = 1.5;
+                            smallHouse.add(house);
+
+                            const roofGeometry = new THREE.ConeGeometry(3, 2, 4);
+                            const roof = new THREE.Mesh(roofGeometry, bronzeMaterial);
+                            roof.position.y = 4;
+                            smallHouse.add(roof);
+
+                            smallHouse.position.set(
+                                Math.cos(i * Math.PI * 2 / 3) * 8,
+                                0,
+                                Math.sin(i * Math.PI * 2 / 3) * 8
+                            );
+                            geometry.add(smallHouse);
+                        }
+
+                        // Forja pequeña
+                        const forgeGeometry = new THREE.BoxGeometry(3, 2, 3);
+                        const forgeMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Color marrón oscuro
+                        const forge = new THREE.Mesh(forgeGeometry, forgeMaterial);
+                        forge.position.set(-5, 1, -5);
+                        geometry.add(forge);
+
+                        // Chimenea de la forja
+                        const chimneyGeometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 8);
+                        const forgeChimney = new THREE.Mesh(chimneyGeometry, stoneMaterial);
+                        forgeChimney.position.set(-5, 3.5, -5);
+                        geometry.add(forgeChimney);
+
+                        // Armas de bronce
+                        for (let i = 0; i < 5; i++) {
+                            const weaponGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
+                            const weapon = new THREE.Mesh(weaponGeometry, bronzeMaterial);
+                            weapon.position.set(
+                                Math.random() * 10 - 5,
+                                0.5,
+                                Math.random() * 10 - 5
+                            );
+                            weapon.rotation.z = Math.PI / 4;
+                            geometry.add(weapon);
+                        }
+
+                        break;
+
+                    case 4: // Edad Oscura
+                        geometry = new THREE.Group();
+
+                        // Muralla de madera
+                        const darkAgeWallMaterial = new THREE.MeshStandardMaterial({ color: 0x4B3621 }); // Marrón oscuro para madera
+                        for (let i = 0; i < 4; i++) {
+                            const wallSegment = new THREE.Mesh(
+                                new THREE.BoxGeometry(20, 5, 1),
+                                darkAgeWallMaterial
+                            );
+                            wallSegment.position.set(
+                                i % 2 === 0 ? 0 : (i === 1 ? 10 : -10),
+                                2.5,
+                                i < 2 ? 10 : -10
+                            );
+                            wallSegment.rotation.y = i % 2 === 0 ? 0 : Math.PI / 2;
+                            geometry.add(wallSegment);
+                        }
+
+                        // Torres de vigilancia
+                        const darkAgeTowerMaterial = new THREE.MeshStandardMaterial({ color: 0x5C4033 }); // Marrón más claro para las torres
+                        for (let i = 0; i < 4; i++) {
+                            const tower = new THREE.Mesh(
+                                new THREE.CylinderGeometry(1.5, 1.5, 8, 8),
+                                darkAgeTowerMaterial
+                            );
+                            tower.position.set(
+                                i % 2 === 0 ? 10 : -10,
+                                4,
+                                i < 2 ? 10 : -10
+                            );
+                            geometry.add(tower);
+                        }
+
+                        // Edificios pequeños de piedra oscura
+                        const darkAgeBuildingMaterial = new THREE.MeshStandardMaterial({ color: 0x2F4F4F }); // Gris pizarra oscuro
+                        for (let i = 0; i < 3; i++) {
+                            const building = new THREE.Mesh(
+                                new THREE.BoxGeometry(4, 3, 4),
+                                darkAgeBuildingMaterial
+                            );
+                            building.position.set(
+                                (i - 1) * 5,
+                                1.5,
+                                0
+                            );
+                            geometry.add(building);
+                        }
+                        break;
+
+                    case 5: // Edad Media
+                        geometry = new THREE.Group();
+
+                        // Torreón (keep)
+                        const medievalKeepMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Marrón más cálido para piedra
+                        const keep = new THREE.Mesh(
+                            new THREE.BoxGeometry(10, 20, 10),
+                            medievalKeepMaterial
+                        );
+                        keep.position.set(0, 10, 0);
+                        geometry.add(keep);
+
+                        // Torres
+                        const medievalTowerMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 }); // Gris más oscuro para las torres
+                        const towerGeometry = new THREE.CylinderGeometry(3, 3, 25, 8);
+                        const tower1 = new THREE.Mesh(towerGeometry, medievalTowerMaterial);
+                        const tower2 = new THREE.Mesh(towerGeometry, medievalTowerMaterial);
+                        tower1.position.set(-10, 12.5, -10);
+                        tower2.position.set(10, 12.5, 10);
+                        geometry.add(tower1, tower2);
+
+                        // Añadir almenas a las torres
+                        const medievalBattlementMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                        const createBattlements = (tower) => {
+                            const battlementGeometry = new THREE.BoxGeometry(1, 2, 1);
+                            for (let i = 0; i < 8; i++) {
+                                const battlement = new THREE.Mesh(battlementGeometry, medievalBattlementMaterial);
+                                battlement.position.set(
+                                    2.5 * Math.cos(i * Math.PI / 4),
+                                    13,
+                                    2.5 * Math.sin(i * Math.PI / 4)
+                                );
+                                tower.add(battlement);
+                            }
+                        };
+                        createBattlements(tower1);
+                        createBattlements(tower2);
+
+                        // Añadir muralla entre las torres
+                        const medievalWallMaterial = new THREE.MeshStandardMaterial({ color: 0x9B7653 }); // Marrón más claro para las murallas
+                        const wallGeometry = new THREE.BoxGeometry(24, 15, 2);
+                        const wall1 = new THREE.Mesh(wallGeometry, medievalWallMaterial);
+                        wall1.position.set(0, 7.5, 7);
+                        const wall2 = wall1.clone();
+                        wall2.position.set(7, 7.5, 0);
+                        wall2.rotation.y = Math.PI / 2;
+                        geometry.add(wall1, wall2);
+
+                        // Añadir puerta
+                        const medievalDoorMaterial = new THREE.MeshStandardMaterial({ color: 0x4E3B31 }); // Marrón oscuro para la puerta
+                        const door = new THREE.Mesh(
+                            new THREE.BoxGeometry(4, 6, 0.5),
+                            medievalDoorMaterial
+                        );
+                        door.position.set(0, 3, 8);
+                        geometry.add(door);
+
+                        // Añadir bandera
+                        const medievalFlagpoleMaterial = new THREE.MeshStandardMaterial({ color: 0xD3D3D3 });
+                        const flagpole = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.1, 0.1, 5, 8),
+                            medievalFlagpoleMaterial
+                        );
+                        flagpole.position.set(0, 22.5, 0);
+                        const medievalFlagMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide });
+                        const flag = new THREE.Mesh(
+                            new THREE.PlaneGeometry(2, 1),
+                            medievalFlagMaterial
+                        );
+                        flag.position.set(1, 3, 0);
+                        flag.rotation.y = Math.PI / 2;
+                        flagpole.add(flag);
+                        geometry.add(flagpole);
+
+                        break;
+                    case 6: // Renacimiento
+                    case 7: // Edad Imperial
+                        geometry = new THREE.Group();
+
+                        // Edificio principal
+                        const mainBuildingGeometry = new THREE.BoxGeometry(20, 30, 20);
+                        geometry.add(new THREE.Mesh(
+                            mainBuildingGeometry,
+                            new THREE.MeshStandardMaterial({ color: 0xDEB887 })
+                        ));
+
+                        // Cúpula
+                        const domeGeometry = new THREE.SphereGeometry(12, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+                        const domeMesh = new THREE.Mesh(
+                            domeGeometry,
+                            new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.5, roughness: 0.3 })
+                        );
+                        domeMesh.position.y = 15;
+                        geometry.add(domeMesh);
+
+                        // Columnas
+                        const columnGeometry = new THREE.CylinderGeometry(1, 1, 25, 16);
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2;
+                            const columnMesh = new THREE.Mesh(
+                                columnGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0xF5F5DC })
+                            );
+                            columnMesh.position.set(
+                                Math.cos(angle) * 12,
+                                12.5,
+                                Math.sin(angle) * 12
+                            );
+                            geometry.add(columnMesh);
+                        }
+
+                        // Escaleras
+                        const stairsGeometry = new THREE.BoxGeometry(30, 2, 10);
+                        const stairsMesh = new THREE.Mesh(
+                            stairsGeometry,
+                            new THREE.MeshStandardMaterial({ color: 0xD3D3D3 })
+                        );
+                        stairsMesh.position.set(0, -14, 15);
+                        geometry.add(stairsMesh);
+
+                        // Estatuas
+                        const statueGeometry = new THREE.CylinderGeometry(1, 1, 6, 8);
+                        for (let i = 0; i < 2; i++) {
+                            const statueMesh = new THREE.Mesh(
+                                statueGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0xC0C0C0 })
+                            );
+                            statueMesh.position.set(i === 0 ? -10 : 10, -11, 12);
+                            geometry.add(statueMesh);
+                        }
+
+                        // Banderas
+                        const flagpoleGeometry = new THREE.CylinderGeometry(0.2, 0.2, 8, 8);
+                        const flagGeometry = new THREE.PlaneGeometry(3, 2);
+                        for (let i = 0; i < 2; i++) {
+                            const flagpoleMesh = new THREE.Mesh(
+                                flagpoleGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                            );
+                            flagpoleMesh.position.set(i === 0 ? -15 : 15, -8, -8);
+
+                            const flagMesh = new THREE.Mesh(
+                                flagGeometry,
+                                new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide })
+                            );
+                            flagMesh.position.set(1.5, 3, 0);
+                            flagMesh.rotation.y = Math.PI / 2;
+
+                            flagpoleMesh.add(flagMesh);
+                            geometry.add(flagpoleMesh);
+                        }
+
+                        break;
+                    case 8: // Edad Industrial
+                    case 9: // Edad Atómica (IGM)
+                    case 10: // Edad Atómica (IIGM)
+                        geometry = new THREE.Group();
+
+                        // Edificio principal (búnker)
+                        geometry.add(new THREE.Mesh(
+                            new THREE.BoxGeometry(30, 15, 30),
+                            new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.7 })
+                        ));
+
+                        // Cúpula de reactor
+                        const reactorDome = new THREE.Mesh(
+                            new THREE.SphereGeometry(8, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+                            new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.5, roughness: 0.5 })
+                        );
+                        reactorDome.position.set(0, 15, 0);
+                        geometry.add(reactorDome);
+
+                        // Torres de enfriamiento
+                        for (let i = 0; i < 2; i++) {
+                            const coolingTower = new THREE.Mesh(
+                                new THREE.CylinderGeometry(5, 7, 20, 16, 1, true),
+                                new THREE.MeshStandardMaterial({ color: 0xD3D3D3, side: THREE.DoubleSide })
+                            );
+                            coolingTower.position.set(i === 0 ? -15 : 15, 10, 0);
+                            geometry.add(coolingTower);
+                        }
+
+                        // Antenas
+                        for (let i = 0; i < 3; i++) {
+                            const antenna = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.2, 0.2, 10, 8),
+                                new THREE.MeshStandardMaterial({ color: 0x696969 })
+                            );
+                            antenna.position.set((i - 1) * 10, 20, 10);
+                            geometry.add(antenna);
+                        }
+
+                        // Valla de seguridad
+                        const fenceGeometry = new THREE.BoxGeometry(60, 3, 0.5);
+                        for (let i = 0; i < 4; i++) {
+                            const fence = new THREE.Mesh(
+                                fenceGeometry,
+                                new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                            );
+                            fence.position.set(
+                                i % 2 === 0 ? 0 : (i === 1 ? 30 : -30),
+                                1.5,
+                                i < 2 ? 30 : -30
+                            );
+                            fence.rotation.y = i % 2 === 0 ? 0 : Math.PI / 2;
+                            geometry.add(fence);
+                        }
+
+                        // Símbolo de radiación
+                        const radiationSymbol = new THREE.Group();
+                        const symbolMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+
+                        // Centro del símbolo
+                        radiationSymbol.add(new THREE.Mesh(
+                            new THREE.CircleGeometry(1, 32),
+                            symbolMaterial
+                        ));
+
+                        // Aspas del símbolo
+                        for (let i = 0; i < 3; i++) {
+                            const blade = new THREE.Mesh(
+                                new THREE.CircleGeometry(3, 32, Math.PI / 3, Math.PI / 3),
+                                symbolMaterial
+                            );
+                            blade.rotation.z = (i * Math.PI * 2) / 3;
+                            radiationSymbol.add(blade);
+                        }
+
+                        radiationSymbol.position.set(0, 7.6, 15.1);
+                        radiationSymbol.rotation.x = -Math.PI / 2;
+                        geometry.add(radiationSymbol);
+
+                        break;
+                    case 11: // Edad Atómica (Moderna)
+                    case 12: // Edad Digital
+                    case 13: // Nano Edad
+                        geometry = new THREE.Group();
+
+                        // Edificio principal futurista
+                        geometry.add(new THREE.Mesh(
+                            new THREE.CylinderGeometry(10, 15, 40, 8),
+                            new THREE.MeshStandardMaterial({ color: 0x4682B4, metalness: 0.7, roughness: 0.2 })
+                        ));
+
+                        // Cúpula de cristal
+                        geometry.add(new THREE.Mesh(
+                            new THREE.SphereGeometry(12, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2),
+                            new THREE.MeshPhysicalMaterial({
+                                color: 0xADD8E6,
+                                transparent: true,
+                                opacity: 0.6,
+                                metalness: 0.9,
+                                roughness: 0.1
+                            })
+                        )).position.y = 20;
+
+                        // Anillos orbitales
+                        for (let i = 0; i < 3; i++) {
+                            const ring = new THREE.Mesh(
+                                new THREE.TorusGeometry(15 + i * 3, 0.5, 16, 100),
+                                new THREE.MeshStandardMaterial({ color: 0x00FFFF, emissive: 0x00FFFF, emissiveIntensity: 0.5 })
+                            );
+                            ring.rotation.x = Math.PI / 2;
+                            ring.position.y = 10 + i * 5;
+                            geometry.add(ring);
+                        }
+
+                        // Plataformas flotantes
+                        for (let i = 0; i < 4; i++) {
+                            const platform = new THREE.Mesh(
+                                new THREE.CylinderGeometry(3, 3, 1, 6),
+                                new THREE.MeshStandardMaterial({ color: 0xA9A9A9, metalness: 0.5, roughness: 0.5 })
+                            );
+                            const angle = (i / 4) * Math.PI * 2;
+                            platform.position.set(
+                                Math.cos(angle) * 20,
+                                Math.sin(angle) * 5 + 15,
+                                Math.sin(angle) * 20
+                            );
+                            geometry.add(platform);
+                        }
+
+                        // Hologramas
+                        const hologramGeometry1 = new THREE.ConeGeometry(2, 4, 32, 1, true);
+                        const hologramMaterial1 = new THREE.MeshBasicMaterial({
+                            color: 0x00FFFF,
+                            transparent: true,
+                            opacity: 0.5
+                        });
+
+                        for (let i = 0; i < 3; i++) {
+                            geometry.add(new THREE.Mesh(hologramGeometry1, hologramMaterial1))
+                                .position.set((i - 1) * 10, 5, 15);
+                        }
+
+                        break;
+                    case 14: // Era Espacial
+                        geometry = new THREE.Group();
+
+                        // Base principal
+                        geometry.add(new THREE.Mesh(
+                            new THREE.CylinderGeometry(15, 20, 30, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.8, roughness: 0.2 })
+                        ));
+
+                        // Cúpula geodésica
+                        geometry.add(new THREE.Mesh(
+                            new THREE.IcosahedronGeometry(18, 2),
+                            new THREE.MeshPhysicalMaterial({
+                                color: 0x00FFFF,
+                                transparent: true,
+                                opacity: 0.6,
+                                metalness: 0.9,
+                                roughness: 0.1
+                            })
+                        )).position.y = 25;
+
+                        // Plataforma de lanzamiento
+                        geometry.add(new THREE.Mesh(
+                            new THREE.CylinderGeometry(10, 10, 2, 32),
+                            new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 })
+                        )).position.set(25, 1, 0);
+
+                        // Cohete
+                        const rocketBody = new THREE.Mesh(
+                            new THREE.CylinderGeometry(2, 3, 20, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xFFFFFF, metalness: 0.5, roughness: 0.5 })
+                        );
+                        rocketBody.position.set(25, 12, 0);
+                        geometry.add(rocketBody);
+
+                        geometry.add(new THREE.Mesh(
+                            new THREE.ConeGeometry(2, 5, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.5, roughness: 0.5 })
+                        )).position.set(25, 24.5, 0);
+
+                        // Antenas parabólicas
+                        for (let i = 0; i < 3; i++) {
+                            const dish = new THREE.Mesh(
+                                new THREE.SphereGeometry(3, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.5),
+                                new THREE.MeshStandardMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+                            );
+                            const angle = (i / 3) * Math.PI * 2;
+                            dish.position.set(
+                                Math.cos(angle) * 20,
+                                5,
+                                Math.sin(angle) * 20
+                            );
+                            dish.rotation.x = -Math.PI / 2;
+                            dish.rotation.y = -angle;
+                            geometry.add(dish);
+                        }
+
+                        // Paneles solares
+                        for (let i = 0; i < 2; i++) {
+                            geometry.add(new THREE.Mesh(
+                                new THREE.BoxGeometry(10, 0.1, 5),
+                                new THREE.MeshStandardMaterial({
+                                    color: 0x1E90FF,
+                                    metalness: 0.8,
+                                    roughness: 0.2
+                                })
+                            )).position.set(i === 0 ? -15 : 15, 10, 10);
+                        }
+
+                        break;
+                    default:
+                        geometry = new THREE.BoxGeometry(10, 20, 10);
+                        material = new THREE.MeshStandardMaterial({ color: eras[currentEra].color });
+                }
+
+                let mesh;
+                if (geometry instanceof THREE.Group) {
+                    mesh = geometry;
+                } else {
+                    mesh = new THREE.Mesh(geometry, material);
+                }
+                mesh.position.set(0, 0, 0);
+                return mesh;
+            }
+
+            upgrade() {
+                this.level++;
+                scene.remove(this.mesh);
+                this.mesh = this.createMesh();
+                this.mesh.scale.set(1 + this.level * 0.1, 1 + this.level * 0.1, 1 + this.level * 0.1);
+                scene.add(this.mesh);
+            }
+        }
+        /* UNIDADES FORMA;COLOR */
+        class Unit {
+            constructor(type) {
+                this.type = type;
+                this.mesh = this.createMesh();
+                this.target = null;
+                this.carrying = null;
+                this.carryingAmount = 0;
+                this.maxCarry = 10;
+                this.speed = 0.5;
+                this.nearestNodes = [];
+                scene.add(this.mesh);
+            }
+
+            createMesh() {
+                const geometry = new THREE.SphereGeometry(2, 32, 32);
+                const material = new THREE.MeshStandardMaterial({ color: this.getColor() });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(Math.random() * 100 - 50, 2, Math.random() * 100 - 50);
+                return mesh;
+            }
+
+            getColor() {
+                switch (this.type) {
+                    case 'worker': return 0x0000FF;
+                    case 'soldier': return 0xFF0000;
+                    default: return 0xFFFFFF;
+                }
+            }
+
+            evolve() {
+                scene.remove(this.mesh);
+                this.mesh = this.createMesh();
+                scene.add(this.mesh);
+            }
+
+            update() {
+                if (this.type === 'worker') {
+                    const sliderValue = document.getElementById('worker-task-slider').value;
+
+                    if (sliderValue === '1') { // Recolectar
+                        if (!this.carrying) {
+                            // Si no está cargando recursos, busca un nodo de recursos
+                            if (!this.target || !this.isValidTarget(this.target) || !this.isTargetResourceEnabled(this.target)) {
+                                this.findNearestResources();
+                                if (this.nearestNodes.length > 0) {
+                                    this.target = this.nearestNodes[0].mesh.position.clone();
+                                }
+                            }
+                        } else {
+                            // Si está cargando recursos, establece la base como objetivo
+                            this.target = base.mesh.position.clone();
+                        }
+
+                        if (this.target) {
+                            const direction = new THREE.Vector3().subVectors(this.target, this.mesh.position).normalize();
+                            this.mesh.position.add(direction.multiplyScalar(this.speed));
+
+                            if (this.mesh.position.distanceTo(this.target) < 1) {
+                                if (!this.carrying) {
+                                    // Llegó al nodo de recursos, comienza a recolectar
+                                    const closestNode = this.findNodeAtPosition(this.target);
+                                    if (closestNode && closestNode.resources > 0 && this.isResourceEnabled(closestNode.type)) {
+                                        this.carrying = closestNode.type;
+                                        this.carryingAmount = Math.min(this.maxCarry, closestNode.resources);
+                                        closestNode.resources -= this.carryingAmount;
+                                        if (closestNode.resources <= 0) {
+                                            this.findNearestResources();
+                                        }
+                                    } else {
+                                        this.findNearestResources();
+                                    }
+                                } else {
+                                    // Llegó a la base, deposita los recursos
+                                    resources[this.carrying] += this.carryingAmount;
+                                    this.carrying = null;
+                                    this.carryingAmount = 0;
+                                    updateResourceDisplay();
+                                    this.findNearestResources(); // Busca nuevos recursos inmediatamente
+                                }
+                                this.target = null;
+                            }
+                        }
+                    } else if (sliderValue === '2') { // Defender
+                        // ... (código de defensa sin cambios)
+                    } else { // Nada (valor 0)
+                        // No hacer nada, quedarse quieto
+                    }
+                }
+            }
+
+            isTargetResourceEnabled(target) {
+                const closestNode = this.findNodeAtPosition(target);
+                return closestNode && this.isResourceEnabled(closestNode.type);
+            }
+
+            isResourceEnabled(resourceType) {
+                const checkboxId = `extract-${resourceType}`;
+                return document.getElementById(checkboxId).checked;
+            }
+
+            findNearestResources() {
+                this.nearestNodes = resourceNodes
+                    .filter(node => node && node.mesh && node.resources > 0 && this.isResourceEnabled(node.type))
+                    .sort((a, b) =>
+                        this.mesh.position.distanceToSquared(a.mesh.position) -
+                        this.mesh.position.distanceToSquared(b.mesh.position)
+                    )
+                    .slice(0, 10);
+
+                if (this.nearestNodes.length === 0) {
+                    this.target = base.mesh.position.clone();
+                }
+            }
+            isValidTarget(target) {
+                return target && target.isVector3 && !isNaN(target.x) && !isNaN(target.y) && !isNaN(target.z);
+            }
+
+            findNodeAtPosition(position) {
+                return this.nearestNodes.find(node =>
+                    node && node.mesh && node.mesh.position &&
+                    node.mesh.position.distanceTo(position) < 0.1
+                );
+            }
+
+            findNearestResources() {
+                const extractFood = document.getElementById('extract-food').checked;
+                const extractWood = document.getElementById('extract-wood').checked;
+                const extractStone = document.getElementById('extract-stone').checked;
+                const extractGold = document.getElementById('extract-gold').checked;
+
+                this.nearestNodes = resourceNodes
+                    .filter(node => node && node.mesh && node.resources > 0 &&
+                        ((node.type === 'food' && extractFood) ||
+                            (node.type === 'wood' && extractWood) ||
+                            (node.type === 'stone' && extractStone) ||
+                            (node.type === 'gold' && extractGold)))
+                    .sort((a, b) =>
+                        this.mesh.position.distanceToSquared(a.mesh.position) -
+                        this.mesh.position.distanceToSquared(b.mesh.position)
+                    )
+                    .slice(0, 10);
+
+                if (this.nearestNodes.length === 0) {
+                    this.target = base.mesh.position.clone();
+                }
+            }
+
+        }
+        // Añade esta función para actualizar el comportamiento de los trabajadores
+        function updateWorkerBehavior() {
+            units.forEach(unit => {
+                if (unit.type === 'worker') {
+                    unit.findNearestResources();
+                    if (!unit.carrying) {
+                        unit.target = null; // Esto forzará a la unidad a buscar un nuevo objetivo en la próxima actualización
+                    }
+                }
+            });
+        }
+
+        /* EDIFICIOS FORMA;COLOR */
+        class Building {
+            constructor(type, position) {
+                this.type = type;
+                this.mesh = this.createMesh(position);
+                scene.add(this.mesh);
+            }
+
+            createMesh(position) {
+                let geometry, color;
+                switch (this.type) {
+                    case 'barracks':
+                        geometry = new THREE.BoxGeometry(10, 8, 10);
+                        color = 0x8B0000;
+                        break;
+                    case 'farm':
+                        geometry = new THREE.CylinderGeometry(5, 5, 6, 8);
+                        color = 0x228B22;
+                        break;
+                    case 'mine':
+                        geometry = new THREE.ConeGeometry(5, 10, 4);
+                        color = 0x708090;
+                        break;
+                    case 'house':
+                        geometry = new THREE.BoxGeometry(8, 6, 8);
+                        color = 0xA0522D;
+                        break;
+                    case 'market':
+                        geometry = new THREE.BoxGeometry(12, 5, 12);
+                        color = 0xFFD700;
+                        break;
+                    case 'temple':
+                        geometry = new THREE.CylinderGeometry(6, 8, 12, 6);
+                        color = 0xFFFFFF;
+                        break;
+                    case 'tower':
+                        geometry = new THREE.CylinderGeometry(3, 5, 15, 8);
+                        color = 0x808080;
+                        break;
+                    case 'workshop':
+                        geometry = new THREE.BoxGeometry(10, 7, 10);
+                        color = 0x8B4513;
+                        break;
+                    case 'dock':
+                        geometry = new THREE.BoxGeometry(15, 3, 8);
+                        color = 0x4682B4;
+                        break;
+                    case 'university':
+                        geometry = new THREE.BoxGeometry(14, 10, 14);
+                        color = 0x800080;
+                        break;
+                    case 'castle':
+                        geometry = new THREE.BoxGeometry(20, 25, 20);
+                        color = 0x696969;
+                        break;
+                    case 'factory':
+                        geometry = new THREE.BoxGeometry(16, 12, 16);
+                        color = 0xB22222;
+                        break;
+                    case 'laboratory':
+                        geometry = new THREE.SphereGeometry(8, 32, 32);
+                        color = 0x00FFFF;
+                        break;
+                    case 'spaceport':
+                        geometry = new THREE.ConeGeometry(10, 20, 32);
+                        color = 0xC0C0C0;
+                        break;
+                    case 'nanofabricator':
+                        geometry = new THREE.OctahedronGeometry(8);
+                        color = 0x32CD32;
+                        break;
+                    default:
+                        geometry = new THREE.BoxGeometry(8, 8, 8);
+                        color = 0x808080;
+                }
+                const material = new THREE.MeshStandardMaterial({ color: color });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.copy(position);
+                mesh.position.y = geometry.parameters.height / 2;
+                return mesh;
+            }
+        }
+        /* COSTO UNIDADES */
+        function createUnit(type) {
+            let cost;
+            switch (type) {
+                case 'worker':
+                    cost = { food: 20 };
+                    break;
+                case 'soldier':
+                    cost = { food: 30, gold: 10 };
+                    break;
+                default:
+                    return;
+            }
+
+            if (canAfford(cost)) {
+                deductResources(cost);
+                units.push(new Unit(type));
+                updateResourceDisplay();
+                updatePopulation();
+            }
+        }
+        /* COSTO EDIFICIOS */
+        function createBuilding(type) {
+            let cost;
+            switch (type) {
+                case 'barracks':
+                    cost = { wood: 50, stone: 30 };
+                    break;
+                case 'farm':
+                    cost = { wood: 40, stone: 20 };
+                    break;
+                case 'mine':
+                    cost = { wood: 60, stone: 40 };
+                    break;
+                case 'house':
+                    cost = { wood: 30, stone: 20 };
+                    break;
+                case 'market':
+                    cost = { wood: 70, stone: 50, gold: 20 };
+                    break;
+                case 'temple':
+                    cost = { stone: 100, gold: 50 };
+                    break;
+                case 'tower':
+                    cost = { stone: 80, wood: 40 };
+                    break;
+                case 'workshop':
+                    cost = { wood: 80, stone: 60 };
+                    break;
+                case 'dock':
+                    cost = { wood: 100, stone: 30 };
+                    break;
+                case 'university':
+                    cost = { stone: 150, wood: 100, gold: 50 };
+                    break;
+                case 'castle':
+                    cost = { stone: 300, wood: 200, gold: 100 };
+                    break;
+                case 'factory':
+                    cost = { stone: 200, wood: 150, gold: 80 };
+                    break;
+                case 'laboratory':
+                    cost = { stone: 180, wood: 120, gold: 100 };
+                    break;
+                case 'spaceport':
+                    cost = { stone: 500, wood: 300, gold: 200 };
+                    break;
+                case 'nanofabricator':
+                    cost = { stone: 400, wood: 250, gold: 300 };
+                    break;
+                default:
+                    return;
+            }
+
+            if (canAfford(cost)) {
+                deductResources(cost);
+                const position = new THREE.Vector3(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
+                buildings.push(new Building(type, position));
+                updateResourceDisplay();
+            }
+        }
+
+        function canAfford(cost) {
+            return Object.entries(cost).every(([resource, amount]) => resources[resource] >= amount);
+        }
+
+        function deductResources(cost) {
+            Object.entries(cost).forEach(([resource, amount]) => resources[resource] -= amount);
+        }
+
+        function createResourceNodes() {
+            const foodNodes = parseInt(document.getElementById('food-nodes').value);
+            const woodNodes = parseInt(document.getElementById('wood-nodes').value);
+            const stoneNodes = parseInt(document.getElementById('stone-nodes').value);
+            const goldNodes = parseInt(document.getElementById('gold-nodes').value);
+
+            for (let i = 0; i < foodNodes; i++) createResourceNode('food');
+            for (let i = 0; i < woodNodes; i++) createResourceNode('wood');
+            for (let i = 0; i < stoneNodes; i++) createResourceNode('stone');
+            for (let i = 0; i < goldNodes; i++) createResourceNode('gold');
+        }
+
+        /* FORMA COLOR RECURSOS */
+        const BASE_SCALE = 2; // Escala base para la comida
+
+                function createResourceNode(type) {
+            let mesh;
+            const terrainSize = 10000;
+            const halfSize = terrainSize / 2;
+
+            switch (type) {
+                case 'food':
+                    // Comida: mantiene la escala base
+                    const foodGeometry = new THREE.SphereGeometry(3, 32, 32);
+                    const foodMaterial = new THREE.MeshStandardMaterial({ color: 0x00FF00, metalness: 0.7, roughness: 0.3 });
+                    mesh = new THREE.Mesh(foodGeometry, foodMaterial);
+
+                    const numSpheres = 10;
+                    for (let i = 0; i < numSpheres; i++) {
+                        const smallSphere = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.3, 16, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xFF0000, metalness: 0.7, roughness: 0.3 })
+                        );
+
+                        const phi = Math.acos(-1 + (2 * i) / numSpheres);
+                        const theta = Math.sqrt(numSpheres * Math.PI) * phi;
+
+                        smallSphere.position.setFromSpherical(new THREE.Spherical(3, phi, theta));
+                        mesh.add(smallSphere);
+                    }
+                    mesh.scale.multiplyScalar(BASE_SCALE);
+                    resourceAmount = 2500;
+                    break;
+
+                case 'wood':
+                    // Pino: 3 veces más grande que piedra y oro (6 veces la escala base)
+                    const trunkGeometry = new THREE.CylinderGeometry(0.5, 1, 4, 8);
+                    const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+
+                    const leavesGeometry = new THREE.ConeGeometry(3, 6, 8);
+                    const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                    leaves.position.y = 5;
+
+                    mesh = new THREE.Group();
+                    mesh.add(trunk);
+                    mesh.add(leaves);
+                    mesh.scale.multiplyScalar(BASE_SCALE * 6);
+                    resourceAmount = 500;
+                    break;
+
+                case 'stone':
+                    // Piedra: 2 veces más grande que la comida
+                    const stoneGeometry = new THREE.DodecahedronGeometry(3, 0);
+                    const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                    mesh = new THREE.Mesh(stoneGeometry, stoneMaterial);
+                    mesh.scale.set(1, 0.7, 1);  // Aplanar un poco
+                    mesh.scale.multiplyScalar(BASE_SCALE * 2);
+                    resourceAmount = 300000;
+                    break;
+
+                case 'gold':
+                    // Oro: 2 veces más grande que la comida
+                    const goldGeometry = new THREE.DodecahedronGeometry(3, 0);
+                    const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.7, roughness: 0.3 });
+                    mesh = new THREE.Mesh(goldGeometry, goldMaterial);
+                    mesh.scale.multiplyScalar(BASE_SCALE * 2);
+                    resourceAmount = 200000;
+                    break;
+            }
+
+            mesh.position.set(
+                Math.random() * terrainSize - halfSize,
+                mesh.scale.y * 1.5,
+                Math.random() * terrainSize - halfSize
+            );
+
+            scene.add(mesh);
+            resourceNodes.push({ type: type, mesh: mesh, resources: resourceAmount });
+        }
+
+        function updatePopulation() {
+            document.getElementById('population').textContent = units.length;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            units.forEach(unit => unit.update());
+            updateResourceNodes();
+            updateCamera();
+            renderer.render(scene, camera);
+
+            // Actualizar la posición del hoverInfo si está visible
+            if (hoverInfo.style.display !== 'none') {
+                const vector = new THREE.Vector3();
+                const canvas = renderer.domElement;
+
+                vector.set(mouse.x, mouse.y, 0.5);
+                vector.unproject(camera);
+
+                vector.sub(camera.position).normalize();
+                const distance = - camera.position.z / vector.z;
+                const pos = camera.position.clone().add(vector.multiplyScalar(distance));
+
+                hoverInfo.style.left = (pos.x * canvas.width / 2 + canvas.width / 2) + 'px';
+                hoverInfo.style.top = (- pos.y * canvas.height / 2 + canvas.height / 2) + 'px';
+            }
+        }
+
+        function updateResourceNodes() {
+            resourceNodes = resourceNodes.filter(node => {
+                if (node && node.resources <= 0) {
+                    if (node.mesh && node.mesh.parent) {
+                        node.mesh.parent.remove(node.mesh);
+                    }
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        // ... (código anterior sin cambios)
+
+        function onMouseMove(event) {
+            // Calcular la posición del mouse en coordenadas normalizadas (-1 a +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            // Actualizar el raycaster con la posición del mouse y la cámara
+            raycaster.setFromCamera(mouse, camera);
+
+            // Calcular objetos que intersectan con el rayo
+            const intersects = raycaster.intersectObjects(scene.children);
+
+            if (intersects.length > 0) {
+                // Buscar el primer objeto intersectado que sea un nodo de recursos
+                const resourceNode = resourceNodes.find(node => node.mesh === intersects[0].object);
+                if (resourceNode) {
+                    // Mostrar información del nodo de recursos
+                    hoverInfo.style.display = 'block';
+                    hoverInfo.style.left = event.clientX + 'px';
+                    hoverInfo.style.top = event.clientY + 'px';
+                    hoverInfo.textContent = `${resourceNode.type}`; // Eliminamos la cantidad de recursos
+                } else {
+                    hoverInfo.style.display = 'none';
+                }
+            } else {
+                hoverInfo.style.display = 'none';
+            }
+        }
+
+        // ... (código posterior sin cambios)
+
+        // Event Listeners
+        document.getElementById('advance-era').addEventListener('click', advanceEra);
+        document.getElementById('open-config').addEventListener('click', () => {
+            document.getElementById('config-menu').style.display = 'block';
+        });
+        document.getElementById('start-game').addEventListener('click', startGame);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Llame a updateUnitButtons() cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUnitButtons();
+        });
+
+        // Añadir event listeners para el slider y los checkboxes
+        document.getElementById('worker-task-slider').addEventListener('input', updateWorkerBehavior);
+        document.getElementById('extract-food').addEventListener('change', updateWorkerBehavior);
+        document.getElementById('extract-wood').addEventListener('change', updateWorkerBehavior);
+        document.getElementById('extract-stone').addEventListener('change', updateWorkerBehavior);
+        document.getElementById('extract-gold').addEventListener('change', updateWorkerBehavior);
+
+        function updateWorkerBehavior() {
+            // Esta función se llamará cada vez que se cambie el slider o los checkboxes
+            // No necesitamos hacer nada aquí porque los trabajadores ya están leyendo estos valores en cada frame
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
